@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controle Financeiro</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0d0f14;--surface:#161a23;--surface2:#1e2331;
+  --border:#2a3044;--red:#e05555;--red-soft:rgba(224,85,85,.12);
+  --green:#4caf7d;--green-soft:rgba(76,175,125,.12);
+  --gold:#c9a84c;--gold-soft:rgba(201,168,76,.12);
+  --blue:#4a6fa5;--blue-soft:rgba(74,111,165,.12);
+  --purple:#8b6fc9;--text:#e8eaf0;--muted:#7a8099;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;}
+
+/* HEADER */
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;
+  display:flex;align-items:center;justify-content:space-between;height:60px;
+  position:sticky;top:0;z-index:200;gap:12px;}
+header h1{font-family:'DM Serif Display',serif;font-size:19px;color:var(--gold);white-space:nowrap;}
+.header-right{display:flex;align-items:center;gap:12px;}
+.month-selector{display:flex;align-items:center;gap:10px;}
+.month-selector button{background:none;border:1px solid var(--border);color:var(--muted);
+  width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:14px;transition:all .2s;}
+.month-selector button:hover{border-color:var(--gold);color:var(--gold);}
+#month-label{font-weight:600;min-width:130px;text-align:center;}
+.rep-btn{background:var(--surface2);border:1px solid var(--border);color:var(--muted);
+  padding:6px 14px;border-radius:8px;cursor:pointer;font-size:12px;
+  transition:all .2s;font-family:'DM Sans',sans-serif;white-space:nowrap;}
+.rep-btn:hover{border-color:var(--gold);color:var(--gold);}
+
+/* CONTAINER */
+.container{max-width:1140px;margin:0 auto;padding:22px 18px;}
+
+/* SUMMARY CARDS */
+.summary-grid{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:26px;}
+.summary-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  padding:16px 18px;position:relative;overflow:hidden;flex:1;min-width:150px;}
+.summary-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.c-red::before{background:var(--red);}
+.c-green::before{background:var(--green);}
+.c-blue::before{background:var(--blue);}
+.c-gold::before{background:var(--gold);}
+.c-purple::before{background:var(--purple);}
+.c-teal::before{background:#3ab5b0;}
+.card-label-wrap{display:flex;align-items:center;gap:5px;margin-bottom:4px;}
+.card-label{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:500;flex:1;}
+.icon-btn{background:none;border:none;cursor:pointer;color:var(--muted);font-size:11px;
+  opacity:0;transition:opacity .2s;padding:2px 3px;border-radius:3px;line-height:1;}
+.summary-card:hover .icon-btn{opacity:1;}
+.icon-btn:hover{color:var(--gold);}
+.icon-btn.del:hover{color:var(--red);}
+.card-value{font-size:20px;font-weight:600;font-family:'DM Serif Display',serif;margin-top:2px;}
+.c-red .card-value{color:var(--red);}
+.c-green .card-value{color:var(--green);}
+.c-blue .card-value{color:var(--blue);}
+.c-gold .card-value{color:var(--gold);}
+.c-teal .card-value{color:#3ab5b0;}
+.edit-inline{background:none;border:none;font:inherit;font-size:20px;font-weight:600;
+  font-family:'DM Serif Display',serif;width:100%;cursor:text;outline:none;
+  border-bottom:1px dashed transparent;transition:border-color .2s;padding:0;}
+.edit-inline:focus{border-color:var(--gold);}
+.c-green .edit-inline{color:var(--green);}
+.c-blue .edit-inline{color:var(--blue);}
+.c-teal .edit-inline{color:#3ab5b0;}
+.add-card-btn{background:var(--surface);border:1px dashed var(--border);border-radius:14px;
+  padding:16px 18px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:6px;cursor:pointer;transition:all .2s;min-width:120px;flex:0 0 120px;color:var(--muted);}
+.add-card-btn:hover{border-color:var(--gold);color:var(--gold);}
+.add-card-btn span{font-size:22px;line-height:1;}
+.add-card-btn small{font-size:11px;text-transform:uppercase;letter-spacing:.08em;}
+
+/* MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;
+  align-items:center;justify-content:center;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;
+  padding:26px 26px 22px;width:min(420px,94vw);}
+.modal h3{font-family:'DM Serif Display',serif;font-size:17px;margin-bottom:8px;color:var(--gold);}
+.modal-desc{color:var(--muted);font-size:13px;margin-bottom:18px;line-height:1.5;}
+.mrow{display:flex;gap:12px;}
+.mfield{display:flex;flex-direction:column;gap:5px;margin-bottom:13px;flex:1;}
+.mfield label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
+.mfield input,.mfield select{background:var(--surface2);border:1px solid var(--border);
+  color:var(--text);padding:8px 11px;border-radius:8px;font-family:'DM Sans',sans-serif;
+  font-size:13px;outline:none;transition:border-color .2s;width:100%;}
+.mfield input:focus,.mfield select:focus{border-color:var(--gold);}
+.color-row{display:flex;gap:8px;flex-wrap:wrap;}
+.color-opt{width:26px;height:26px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .2s;}
+.color-opt.sel{border-color:white;}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;}
+.btn-cancel{background:none;border:1px solid var(--border);color:var(--muted);
+  padding:7px 15px;border-radius:8px;cursor:pointer;font-size:13px;transition:all .2s;}
+.btn-cancel:hover{border-color:var(--text);color:var(--text);}
+.btn-ok{background:var(--gold);color:#0d0f14;border:none;padding:7px 18px;border-radius:8px;
+  cursor:pointer;font-weight:600;font-size:13px;transition:opacity .2s;}
+.btn-ok:hover{opacity:.85;}
+.btn-ok.lg{padding:10px 36px;font-size:14px;}
+
+/* MAIN LAYOUT */
+.main-grid{display:grid;grid-template-columns:1fr 340px;gap:18px;align-items:start;}
+.section{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:14px;}
+.section-header{display:flex;align-items:center;justify-content:space-between;
+  padding:13px 16px;border-bottom:1px solid var(--border);background:var(--surface2);}
+.section-header h2{font-family:'DM Serif Display',serif;font-size:14px;
+  display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.sec-name{cursor:pointer;}
+.sec-name:hover{text-decoration:underline;text-decoration-style:dashed;}
+.sec-total{font-size:12px;font-weight:600;color:var(--red);background:var(--red-soft);
+  padding:3px 10px;border-radius:20px;white-space:nowrap;}
+.sec-total.invest{color:var(--green);background:var(--green-soft);}
+.sec-total.info{color:var(--muted);background:rgba(122,128,153,.1);}
+.add-btn{background:var(--gold-soft);border:1px solid var(--gold);color:var(--gold);
+  padding:4px 12px;border-radius:20px;cursor:pointer;font-size:12px;font-weight:500;transition:all .2s;white-space:nowrap;}
+.add-btn:hover{background:var(--gold);color:var(--bg);}
+.info-tag{display:inline-block;background:rgba(139,111,201,.12);color:var(--purple);
+  border-radius:4px;padding:1px 5px;font-size:10px;font-weight:500;text-transform:uppercase;
+  letter-spacing:.05em;font-family:'DM Sans',sans-serif;}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse;}
+thead tr{background:var(--surface2);}
+th{padding:8px 14px;text-align:left;font-size:11px;text-transform:uppercase;
+  letter-spacing:.08em;color:var(--muted);font-weight:500;border-bottom:1px solid var(--border);}
+td{padding:9px 14px;border-bottom:1px solid rgba(42,48,68,.45);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,.02);}
+.en input,.ev input,.eo input,.et input{background:none;border:none;color:var(--text);
+  font-family:'DM Sans',sans-serif;font-size:13px;width:100%;outline:none;
+  border-bottom:1px dashed transparent;transition:border-color .2s;padding:1px 0;}
+.en input:focus,.ev input:focus,.eo input:focus,.et input:focus{border-color:var(--gold);}
+.ev input{color:var(--red);font-weight:500;text-align:right;}
+.ev.ok input{color:var(--green);}
+.eo input{color:var(--muted);font-size:12px;font-style:italic;}
+.del-btn{background:none;border:none;cursor:pointer;color:var(--muted);font-size:15px;
+  opacity:0;transition:opacity .2s,color .2s;padding:2px 4px;border-radius:4px;}
+tr:hover .del-btn{opacity:1;}
+.del-btn:hover{color:var(--red);}
+.parc-badge{display:inline-block;background:var(--gold-soft);color:var(--gold);
+  border-radius:10px;padding:1px 8px;font-size:11px;font-weight:600;white-space:nowrap;}
+
+/* ADD FORM */
+.add-form{display:none;padding:12px 16px;border-bottom:1px solid var(--border);
+  background:rgba(201,168,76,.04);gap:9px;flex-wrap:wrap;align-items:flex-end;}
+.add-form.open{display:flex;}
+.add-form .fld{display:flex;flex-direction:column;gap:4px;flex:1;min-width:100px;}
+.add-form label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
+.add-form input:not([type=checkbox]){background:var(--surface2);border:1px solid var(--border);
+  color:var(--text);padding:7px 10px;border-radius:7px;font-family:'DM Sans',sans-serif;
+  font-size:13px;outline:none;transition:border-color .2s;width:100%;}
+.add-form input:not([type=checkbox]):focus{border-color:var(--gold);}
+.add-form .cbtn{background:var(--gold);color:var(--bg);border:none;padding:8px 16px;
+  border-radius:7px;cursor:pointer;font-weight:600;font-size:13px;align-self:flex-end;white-space:nowrap;}
+
+/* PARCELA TOGGLE */
+.parc-wrap{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap;}
+.parc-chk{display:flex;flex-direction:column;gap:4px;flex:0 0 auto;}
+.parc-chk label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
+.parc-chk-inner{display:flex;align-items:center;gap:6px;height:34px;}
+.parc-chk-inner input[type=checkbox]{accent-color:var(--gold);width:15px;height:15px;cursor:pointer;}
+.parc-chk-inner span{font-size:13px;color:var(--muted);}
+.parc-fields{display:none;gap:6px;}
+.parc-fields.show{display:flex;}
+.parc-fields .fld{flex:0 0 62px;min-width:62px;}
+
+/* BADGE */
+.badge{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--red);}
+.badge.g{background:var(--green);}
+.badge.go{background:var(--gold);}
+.badge.b{background:var(--blue);}
+.badge.t{background:#3ab5b0;}
+
+/* CHART */
+.chart-section{background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  padding:20px 20px 16px;margin-bottom:14px;overflow:hidden;}
+.chart-section h2{font-family:'DM Serif Display',serif;font-size:15px;color:var(--gold);margin-bottom:2px;}
+.chart-sub{font-size:12px;color:var(--muted);margin-bottom:14px;}
+#chart-canvas{display:block;width:100%;border-radius:8px;}
+
+footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
+
+@media(max-width:760px){
+  .main-grid{grid-template-columns:1fr;}
+  .summary-card,.add-card-btn{min-width:calc(50% - 7px);flex-basis:calc(50% - 7px);}
+  header{height:auto;padding:10px 14px;flex-wrap:wrap;}
+  .header-right{flex-wrap:wrap;justify-content:flex-end;gap:8px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ MODAL INICIAL ═══ -->
+<div class="modal-bg open" id="init-modal-bg">
+  <div class="modal">
+    <h3>💰 Controle Financeiro</h3>
+    <p class="modal-desc">Selecione o mês e ano que deseja visualizar ou editar.</p>
+    <div class="mrow">
+      <div class="mfield" style="flex:2">
+        <label>Mês</label>
+        <select id="init-month">
+          <option value="0">Janeiro</option><option value="1">Fevereiro</option>
+          <option value="2">Março</option><option value="3">Abril</option>
+          <option value="4">Maio</option><option value="5">Junho</option>
+          <option value="6">Julho</option><option value="7">Agosto</option>
+          <option value="8">Setembro</option><option value="9">Outubro</option>
+          <option value="10">Novembro</option><option value="11">Dezembro</option>
+        </select>
+      </div>
+      <div class="mfield" style="flex:1">
+        <label>Ano</label>
+        <input id="init-year" type="number" min="2020" max="2099">
+      </div>
+    </div>
+    <div class="modal-actions" style="justify-content:center;margin-top:4px">
+      <button class="btn-ok lg" onclick="initPeriod()">Entrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ HEADER ═══ -->
+<header>
+  <h1>💰 Controle Financeiro</h1>
+  <div class="header-right">
+    <button class="rep-btn" onclick="replicarMes()">↷ Replicar para o mês seguinte</button>
+    <div class="month-selector">
+      <button onclick="changeMonth(-1)">‹</button>
+      <span id="month-label"></span>
+      <button onclick="changeMonth(1)">›</button>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- ═══ SUMMARY CARDS ═══ -->
+  <div class="summary-grid" id="summary-grid">
+    <div class="summary-card c-red">
+      <div class="card-label-wrap"><span class="card-label">Total de Gastos</span></div>
+      <div class="card-value" id="sum-total">R$ 0,00</div>
+    </div>
+    <div class="summary-card c-green">
+      <div class="card-label-wrap">
+        <span class="card-label" id="lbl-salario">Salário</span>
+        <button class="icon-btn" onclick="openRenameFixed('salario')" title="Renomear">✎</button>
+      </div>
+      <input class="edit-inline" id="field-salario" value="R$ 0,00"
+        onblur="saveField('salario',this.value);recalc()" onfocus="selAll(this)">
+    </div>
+    <div class="summary-card c-blue">
+      <div class="card-label-wrap">
+        <span class="card-label" id="lbl-proventos">Demais Proventos</span>
+        <button class="icon-btn" onclick="openRenameFixed('proventos')" title="Renomear">✎</button>
+      </div>
+      <input class="edit-inline" id="field-proventos" value="R$ 0,00" style="color:var(--blue)"
+        onblur="saveField('proventos',this.value);recalc()" onfocus="selAll(this)">
+    </div>
+    <div class="summary-card c-gold">
+      <div class="card-label-wrap"><span class="card-label">Sobra do Mês</span></div>
+      <div class="card-value" id="sum-sobra">R$ 0,00</div>
+    </div>
+    <div class="summary-card c-teal">
+      <div class="card-label-wrap">
+        <span class="card-label" id="lbl-saldo">Saldo em Conta na virada do mês</span>
+        <button class="icon-btn" onclick="openRenameFixed('saldo')" title="Renomear">✎</button>
+      </div>
+      <input class="edit-inline" id="field-saldo" value="R$ 0,00" style="color:#3ab5b0"
+        onblur="saveField('saldo',this.value);recalc()" onfocus="selAll(this)">
+    </div>
+    <div id="custom-cards"></div>
+    <button class="add-card-btn" onclick="openAddCard()"><span>＋</span><small>Novo Card</small></button>
+  </div>
+
+  <!-- ═══ MAIN GRID ═══ -->
+  <div class="main-grid">
+
+    <!-- ESQUERDA: GASTOS FIXOS -->
+    <div>
+      <div class="section">
+        <div class="section-header">
+          <h2>
+            <span class="badge"></span>
+            <span class="sec-name" id="sn-fixas" onclick="openRenameSection('fixas')">Gastos Fixos</span>
+          </h2>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="sec-total" id="tot-fixas">R$ 0,00</span>
+            <button class="add-btn" onclick="toggleForm('form-fixas')">+ Adicionar</button>
+          </div>
+        </div>
+        <div class="add-form" id="form-fixas">
+          <div class="fld"><label>Descrição</label><input id="nf-fixas" placeholder="ex: Aluguel"></div>
+          <div class="fld" style="max-width:130px"><label>Valor (R$)</label><input id="vf-fixas" placeholder="824,04"></div>
+          <div class="fld"><label>Observação</label><input id="of-fixas" placeholder="opcional"></div>
+          <div class="parc-wrap">
+            <div class="parc-chk">
+              <label>Parcelado?</label>
+              <div class="parc-chk-inner">
+                <input type="checkbox" id="pcheck-fixas" onchange="toggleParcela('fixas')">
+                <span>Sim</span>
+              </div>
+            </div>
+            <div class="parc-fields" id="pf-fixas">
+              <div class="fld"><label>Parcela</label><input id="pa-fixas" type="number" min="1" placeholder="1"></div>
+              <div class="fld"><label>De</label><input id="pt-fixas" type="number" min="1" placeholder="12"></div>
+            </div>
+          </div>
+          <button class="cbtn" onclick="addItem('fixas')">Adicionar</button>
+        </div>
+        <table>
+          <thead><tr>
+            <th>Descrição</th>
+            <th style="text-align:right">Valor</th>
+            <th style="text-align:center;width:72px">Parcela</th>
+            <th>Observação</th>
+            <th></th>
+          </tr></thead>
+          <tbody id="tbody-fixas"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- DIREITA: CONSULTIVOS -->
+    <div>
+
+      <!-- CONTAS PARCELADAS NO CARTÃO -->
+      <div class="section">
+        <div class="section-header">
+          <h2>
+            <span class="badge go"></span>
+            <span class="sec-name" id="sn-cartao" onclick="openRenameSection('cartao')">Contas parceladas no cartão</span>
+            <span class="info-tag">consultivo</span>
+          </h2>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="sec-total info" id="tot-cartao">R$ 0,00</span>
+            <button class="add-btn" onclick="toggleForm('form-cartao')">+</button>
+          </div>
+        </div>
+        <div class="add-form" id="form-cartao">
+          <div class="fld"><label>Descrição</label><input id="nf-cartao" placeholder="ex: TV 65&quot;"></div>
+          <div class="fld" style="max-width:110px"><label>Valor</label><input id="vf-cartao" placeholder="350,00"></div>
+          <div class="fld"><label>Obs.</label><input id="of-cartao" placeholder="opcional"></div>
+          <div class="parc-wrap">
+            <div class="parc-chk">
+              <label>Parcelado?</label>
+              <div class="parc-chk-inner">
+                <input type="checkbox" id="pcheck-cartao" onchange="toggleParcela('cartao')">
+                <span>Sim</span>
+              </div>
+            </div>
+            <div class="parc-fields" id="pf-cartao">
+              <div class="fld"><label>Parcela</label><input id="pa-cartao" type="number" min="1" placeholder="1"></div>
+              <div class="fld"><label>De</label><input id="pt-cartao" type="number" min="1" placeholder="12"></div>
+            </div>
+          </div>
+          <button class="cbtn" onclick="addItem('cartao')">OK</button>
+        </div>
+        <table>
+          <thead><tr>
+            <th>Descrição</th>
+            <th style="text-align:right">Valor</th>
+            <th style="text-align:center;width:72px">Parcela</th>
+            <th>Observação</th>
+            <th></th>
+          </tr></thead>
+          <tbody id="tbody-cartao"></tbody>
+        </table>
+      </div>
+
+      <!-- GASTOS COM IA -->
+      <div class="section">
+        <div class="section-header">
+          <h2>
+            <span class="badge b"></span>
+            <span class="sec-name" id="sn-ia" onclick="openRenameSection('ia')">Gastos com IA</span>
+            <span class="info-tag">consultivo</span>
+          </h2>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="sec-total info" id="tot-ia">R$ 0,00</span>
+            <button class="add-btn" onclick="toggleForm('form-ia')">+</button>
+          </div>
+        </div>
+        <div class="add-form" id="form-ia">
+          <div class="fld"><label>Descrição</label><input id="nf-ia" placeholder="ex: Claude Pro"></div>
+          <div class="fld" style="max-width:110px"><label>Valor</label><input id="vf-ia" placeholder="20,00"></div>
+          <div class="fld"><label>Obs.</label><input id="of-ia" placeholder="opcional"></div>
+          <div class="parc-wrap">
+            <div class="parc-chk">
+              <label>Parcelado?</label>
+              <div class="parc-chk-inner">
+                <input type="checkbox" id="pcheck-ia" onchange="toggleParcela('ia')">
+                <span>Sim</span>
+              </div>
+            </div>
+            <div class="parc-fields" id="pf-ia">
+              <div class="fld"><label>Parcela</label><input id="pa-ia" type="number" min="1" placeholder="1"></div>
+              <div class="fld"><label>De</label><input id="pt-ia" type="number" min="1" placeholder="12"></div>
+            </div>
+          </div>
+          <button class="cbtn" onclick="addItem('ia')">OK</button>
+        </div>
+        <table>
+          <thead><tr>
+            <th>Descrição</th>
+            <th style="text-align:right">Valor</th>
+            <th style="text-align:center;width:72px">Parcela</th>
+            <th>Observação</th>
+            <th></th>
+          </tr></thead>
+          <tbody id="tbody-ia"></tbody>
+        </table>
+      </div>
+
+      <!-- VALOR INVESTIDO -->
+      <div class="section">
+        <div class="section-header">
+          <h2>
+            <span class="badge t"></span>
+            <span style="font-family:'DM Serif Display',serif">Valor Investido</span>
+            <span class="info-tag">consultivo</span>
+          </h2>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="sec-total invest" id="tot-investimentos">R$ 0,00</span>
+            <button class="add-btn" onclick="toggleForm('form-investimentos')">+</button>
+          </div>
+        </div>
+        <div class="add-form" id="form-investimentos">
+          <div class="fld"><label>Tipo de Investimento</label><input id="iv-tipo" placeholder="ex: Tesouro Direto"></div>
+          <div class="fld" style="max-width:130px"><label>Valor (R$)</label><input id="iv-val" placeholder="500,00"></div>
+          <div class="fld" style="max-width:150px"><label>Data</label><input id="iv-data" type="date"></div>
+          <button class="cbtn" onclick="addInvestimento()">OK</button>
+        </div>
+        <table>
+          <thead><tr>
+            <th>Tipo</th>
+            <th style="text-align:right">Valor</th>
+            <th>Data</th>
+            <th></th>
+          </tr></thead>
+          <tbody id="tbody-investimentos"></tbody>
+        </table>
+      </div>
+
+    </div><!-- /direita -->
+  </div><!-- /main-grid -->
+
+  <!-- ═══ GRÁFICO ═══ -->
+  <div class="chart-section">
+    <h2>Comparativo Mensal</h2>
+    <p class="chart-sub" id="chart-sub-label">—</p>
+    <canvas id="chart-canvas" height="280"></canvas>
+  </div>
+
+</div><!-- /container -->
+
+<footer>Dados salvos localmente no navegador · Controle Financeiro Pessoal © 2026</footer>
+
+<!-- ═══ MODAL GERAL ═══ -->
+<div class="modal-bg" id="modal-bg">
+  <div class="modal">
+    <h3 id="modal-title">Novo Card</h3>
+    <div class="mfield"><label>Nome</label><input id="m-name" placeholder="ex: Reserva"></div>
+    <div class="mfield" id="m-val-wrap"><label>Valor</label><input id="m-val" placeholder="R$ 0,00"></div>
+    <div class="mfield" id="m-color-wrap">
+      <label>Cor</label>
+      <div class="color-row">
+        <div class="color-opt sel" data-c="c-green" style="background:#4caf7d" onclick="pickColor(this)"></div>
+        <div class="color-opt" data-c="c-blue" style="background:#4a6fa5" onclick="pickColor(this)"></div>
+        <div class="color-opt" data-c="c-gold" style="background:#c9a84c" onclick="pickColor(this)"></div>
+        <div class="color-opt" data-c="c-red" style="background:#e05555" onclick="pickColor(this)"></div>
+        <div class="color-opt" data-c="c-purple" style="background:#8b6fc9" onclick="pickColor(this)"></div>
+        <div class="color-opt" data-c="c-teal" style="background:#3ab5b0" onclick="pickColor(this)"></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="btn-ok" onclick="doModal()">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── CONSTANTES & ESTADO ──────────────────────────────────────────
+const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+                'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+let cY = new Date().getFullYear();
+let cM = new Date().getMonth();
+let mMode = 'add', mKey = null, mIdx = null;
+
+// ─── STORAGE ─────────────────────────────────────────────────────
+const sk  = s => `fin_${cY}_${cM}_${s}`;
+const fk  = k => `fin_f_${cY}_${cM}_${k}`;
+const lk  = k => `fin_lbl_${k}`;
+const snk = s => `fin_sn_${s}`;
+const cck = () => `fin_cc_${cY}_${cM}`;
+
+function ls(k,d)   { const r=localStorage.getItem(k); return r===null?d:r; }
+function lsj(k,d)  { const r=localStorage.getItem(k); return r?JSON.parse(r):d; }
+function ss(k,v)   { localStorage.setItem(k,v); }
+function ssj(k,v)  { localStorage.setItem(k,JSON.stringify(v)); }
+function saveField(k,v) { ss(fk(k),v); }
+
+// ─── DADOS ───────────────────────────────────────────────────────
+const DEFAULTS = { fixas:[], cartao:[], ia:[], investimentos:[] };
+function loadSec(s)            { return lsj(sk(s), JSON.parse(JSON.stringify(DEFAULTS[s]||[]))); }
+function saveSec(s,d)          { ssj(sk(s),d); }
+function loadSecAt(s,y,m)      { return lsj(`fin_${y}_${m}_${s}`,[]); }
+function loadCC()              { return lsj(cck(),[]); }
+function saveCC(d)             { ssj(cck(),d); }
+
+// ─── FORMATAÇÃO ──────────────────────────────────────────────────
+function fmt(n) {
+  return 'R$ ' + Math.abs(n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function fmtS(n) {
+  const s = Math.abs(n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  return (n<0?'-':'') + 'R$ ' + s;
+}
+function parse(s) {
+  return parseFloat((s||'').replace(/[R$\s.]/g,'').replace(',','.'))||0;
+}
+function parseSigned(s) {
+  const str = (s||'').trim();
+  const neg = str.startsWith('-') || str.replace(/[R$\s]/g,'').startsWith('-');
+  const abs = parseFloat(str.replace(/[^0-9,]/g,'').replace(',','.'))||0;
+  return neg ? -abs : abs;
+}
+function esc(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+}
+function selAll(el) { setTimeout(()=>el.select(),0); }
+function colorVal(c) {
+  return {'c-green':'var(--green)','c-blue':'var(--blue)','c-gold':'var(--gold)',
+          'c-red':'var(--red)','c-purple':'#8b6fc9','c-teal':'#3ab5b0'}[c]||'var(--text)';
+}
+
+// ─── TOGGLE PARCELA ──────────────────────────────────────────────
+function toggleParcela(s) {
+  const chk = document.getElementById('pcheck-'+s);
+  const fields = document.getElementById('pf-'+s);
+  if (!chk||!fields) return;
+  fields.classList.toggle('show', chk.checked);
+}
+
+// ─── RENDER SEÇÕES ───────────────────────────────────────────────
+function renderSec(s) {
+  const data = loadSec(s);
+  const tbody = document.getElementById('tbody-'+s);
+  tbody.innerHTML = '';
+  data.forEach((item,i) => {
+    const p = item.parcela;
+    const parcEl = (p && p.ativo)
+      ? `<span class="parc-badge">${p.atual}/${p.total}</span>`
+      : `<span style="color:var(--muted);font-size:12px">—</span>`;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="en"><input value="${esc(item.name)}" onblur="upd('${s}',${i},'name',this.value)"></td>
+      <td class="ev" style="text-align:right"><input value="${item.value.toFixed(2).replace('.',',')}" style="text-align:right" onblur="upd('${s}',${i},'value',this.value)"></td>
+      <td style="text-align:center;width:72px">${parcEl}</td>
+      <td class="eo"><input value="${esc(item.obs||'')}" placeholder="obs..." onblur="upd('${s}',${i},'obs',this.value)"></td>
+      <td style="width:24px"><button class="del-btn" onclick="delItem('${s}',${i})">×</button></td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('tot-'+s).textContent = fmt(data.reduce((a,i)=>a+i.value,0));
+  recalc();
+}
+
+function renderInvestimentos() {
+  const data = loadSec('investimentos');
+  const tbody = document.getElementById('tbody-investimentos');
+  tbody.innerHTML = '';
+  let total = 0;
+  data.forEach((item,i) => {
+    total += item.valor||0;
+    const dateStr = item.data
+      ? new Date(item.data+'T00:00:00').toLocaleDateString('pt-BR')
+      : '—';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="et"><input value="${esc(item.tipo||'')}" placeholder="tipo..." onblur="updInvest(${i},'tipo',this.value)"></td>
+      <td class="ev ok" style="text-align:right"><input value="${(item.valor||0).toFixed(2).replace('.',',')}" style="text-align:right" onblur="updInvest(${i},'valor',this.value)"></td>
+      <td style="color:var(--muted);font-size:12px;white-space:nowrap">${dateStr}</td>
+      <td style="width:24px"><button class="del-btn" onclick="delInvest(${i})">×</button></td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('tot-investimentos').textContent = fmt(total);
+  renderChart();
+}
+
+function renderAll() {
+  ['fixas','cartao','ia'].forEach(renderSec);
+  renderInvestimentos();
+}
+
+// ─── CUSTOM CARDS ────────────────────────────────────────────────
+function renderCC() {
+  const area = document.getElementById('custom-cards');
+  area.style.display = 'contents';
+  area.innerHTML = '';
+  loadCC().forEach((c,i) => {
+    const d = document.createElement('div');
+    d.className = `summary-card ${c.color}`;
+    d.innerHTML = `
+      <div class="card-label-wrap">
+        <span class="card-label">${esc(c.name)}</span>
+        <button class="icon-btn" onclick="openEditCC(${i})" title="Editar">✎</button>
+        <button class="icon-btn del" onclick="delCC(${i})" title="Remover">×</button>
+      </div>
+      <input class="edit-inline" value="${esc(c.value)}" style="color:${colorVal(c.color)}"
+        onblur="updCC(${i},this.value)" onfocus="selAll(this)">`;
+    area.appendChild(d);
+  });
+}
+function updCC(i,v) { const d=loadCC(); d[i].value=v; saveCC(d); }
+function delCC(i)   { if(!confirm('Remover card?')) return; const d=loadCC(); d.splice(i,1); saveCC(d); renderCC(); }
+
+// ─── RECALC ──────────────────────────────────────────────────────
+// Apenas "fixas" afeta o Total de Gastos e a Sobra.
+// Saldo em conta (pode ser negativo) também entra na Sobra.
+function recalc() {
+  const grand = loadSec('fixas').reduce((a,i)=>a+i.value, 0);
+  const sal   = parse(document.getElementById('field-salario').value);
+  const prov  = parse(document.getElementById('field-proventos').value);
+  const saldo = parseSigned(document.getElementById('field-saldo').value);
+  const sobra = sal + prov + saldo - grand;
+
+  document.getElementById('sum-total').textContent = fmt(grand);
+  const el = document.getElementById('sum-sobra');
+  el.textContent = fmtS(sobra);
+  el.style.color = sobra >= 0 ? 'var(--green)' : 'var(--red)';
+
+  renderChart();
+}
+
+// ─── MUTAÇÕES ────────────────────────────────────────────────────
+function upd(s,i,f,v) {
+  const d = loadSec(s);
+  if (f==='value') d[i].value = parse(v); else d[i][f] = v;
+  saveSec(s,d);
+  document.getElementById('tot-'+s).textContent = fmt(d.reduce((a,x)=>a+x.value,0));
+  recalc();
+}
+function delItem(s,i) {
+  const d = loadSec(s); d.splice(i,1); saveSec(s,d); renderSec(s);
+}
+function addItem(s) {
+  const name  = document.getElementById('nf-'+s).value.trim();
+  const val   = parse(document.getElementById('vf-'+s).value);
+  const obs   = (document.getElementById('of-'+s)||{}).value||'';
+  const isP   = document.getElementById('pcheck-'+s)?.checked||false;
+  const pAtual = parseInt(document.getElementById('pa-'+s)?.value)||1;
+  const pTotal = parseInt(document.getElementById('pt-'+s)?.value)||1;
+  if (!name) return;
+  const d = loadSec(s);
+  d.push({ id:Date.now(), name, value:val, obs,
+    parcela:{ ativo:isP, atual:pAtual, total:Math.max(pAtual,pTotal) } });
+  saveSec(s,d);
+  ['nf-','vf-','of-','pa-','pt-'].forEach(p => { const el=document.getElementById(p+s); if(el) el.value=''; });
+  const pck = document.getElementById('pcheck-'+s);
+  if (pck) { pck.checked=false; toggleParcela(s); }
+  renderSec(s);
+}
+
+function updInvest(i,f,v) {
+  const d = loadSec('investimentos');
+  if (f==='valor') d[i].valor = parse(v); else d[i][f] = v;
+  saveSec('investimentos',d);
+  renderInvestimentos();
+}
+function delInvest(i) {
+  const d = loadSec('investimentos'); d.splice(i,1); saveSec('investimentos',d); renderInvestimentos();
+}
+function addInvestimento() {
+  const tipo = document.getElementById('iv-tipo').value.trim();
+  const val  = parse(document.getElementById('iv-val').value);
+  const data = document.getElementById('iv-data').value;
+  if (!tipo && !val) return;
+  const d = loadSec('investimentos');
+  d.push({ id:Date.now(), tipo, valor:val, data });
+  saveSec('investimentos',d);
+  document.getElementById('iv-tipo').value = '';
+  document.getElementById('iv-val').value  = '';
+  document.getElementById('iv-data').value = '';
+  renderInvestimentos();
+}
+
+function toggleForm(id) {
+  const f = document.getElementById(id);
+  f.classList.toggle('open');
+  if (f.classList.contains('open')) f.querySelector('input').focus();
+}
+
+// ─── REPLICAR MÊS ────────────────────────────────────────────────
+function replicarMes() {
+  const nm = cM===11 ? 0    : cM+1;
+  const ny = cM===11 ? cY+1 : cY;
+  if (!confirm(
+    `Replicar todos os dados de ${MONTHS[cM]} ${cY} para ${MONTHS[nm]} ${ny}?\n\n` +
+    `• Itens parcelados terão a parcela incrementada.\n` +
+    `• Itens com parcela concluída (ex: 10/10) serão descartados.`
+  )) return;
+
+  ['fixas','cartao','ia','investimentos'].forEach(s => {
+    const curr = loadSecAt(s, cY, cM);
+    const next = [];
+    curr.forEach(item => {
+      if (item.parcela && item.parcela.ativo) {
+        if (item.parcela.atual >= item.parcela.total) return; // descarta
+        next.push({ ...item, id:Date.now()+Math.random(),
+          parcela: { ...item.parcela, atual: item.parcela.atual+1 } });
+      } else {
+        next.push({ ...item, id:Date.now()+Math.random() });
+      }
+    });
+    localStorage.setItem(`fin_${ny}_${nm}_${s}`, JSON.stringify(next));
+  });
+
+  // Replica salário e proventos — não replica saldo (específico da virada)
+  ['salario','proventos'].forEach(k => {
+    const v = localStorage.getItem(`fin_f_${cY}_${cM}_${k}`);
+    if (v) localStorage.setItem(`fin_f_${ny}_${nm}_${k}`, v);
+  });
+
+  alert(`✓ Dados replicados para ${MONTHS[nm]} ${ny}!\nUse as setas do cabeçalho para navegar.`);
+}
+
+// ─── MODAL INICIAL ───────────────────────────────────────────────
+function initPeriod() {
+  cM = parseInt(document.getElementById('init-month').value);
+  cY = parseInt(document.getElementById('init-year').value) || new Date().getFullYear();
+  document.getElementById('init-modal-bg').classList.remove('open');
+  loadUI();
+}
+
+// ─── MODAL GERAL ─────────────────────────────────────────────────
+function pickColor(el) {
+  document.querySelectorAll('.color-opt').forEach(o=>o.classList.remove('sel'));
+  el.classList.add('sel');
+}
+function selColor(c) {
+  document.querySelectorAll('.color-opt').forEach(o=>o.classList.toggle('sel', o.dataset.c===c));
+}
+function showFields(val, color) {
+  document.getElementById('m-val-wrap').style.display   = val   ? '' : 'none';
+  document.getElementById('m-color-wrap').style.display = color ? '' : 'none';
+}
+function openModal() {
+  document.getElementById('modal-bg').classList.add('open');
+  setTimeout(()=>document.getElementById('m-name').focus(), 50);
+}
+function closeModal() { document.getElementById('modal-bg').classList.remove('open'); }
+
+function openAddCard() {
+  mMode='add';
+  document.getElementById('modal-title').textContent = 'Novo Card';
+  document.getElementById('m-name').value = '';
+  document.getElementById('m-val').value  = '';
+  selColor('c-green'); showFields(true,true); openModal();
+}
+function openEditCC(i) {
+  mMode='edit-cc'; mIdx=i;
+  const c = loadCC()[i];
+  document.getElementById('modal-title').textContent = 'Editar Card';
+  document.getElementById('m-name').value = c.name;
+  document.getElementById('m-val').value  = c.value;
+  selColor(c.color); showFields(true,true); openModal();
+}
+function openRenameFixed(k) {
+  mMode='rename-fixed'; mKey=k;
+  document.getElementById('modal-title').textContent = 'Renomear';
+  document.getElementById('m-name').value = ls(lk(k), {
+    salario:'Salário', proventos:'Demais Proventos', saldo:'Saldo em Conta na virada do mês'
+  }[k]);
+  showFields(false,false); openModal();
+}
+function openRenameSection(s) {
+  mMode='rename-sec'; mKey=s;
+  document.getElementById('modal-title').textContent = 'Renomear Seção';
+  document.getElementById('m-name').value = ls(snk(s), {
+    fixas:'Gastos Fixos', cartao:'Contas parceladas no cartão', ia:'Gastos com IA'
+  }[s]);
+  showFields(false,false); openModal();
+}
+function doModal() {
+  const name  = document.getElementById('m-name').value.trim();
+  const val   = document.getElementById('m-val').value.trim()||'R$ 0,00';
+  const color = document.querySelector('.color-opt.sel')?.dataset.c||'c-green';
+  if (!name) return;
+  if      (mMode==='add')          { const d=loadCC(); d.push({name,value:val,color}); saveCC(d); renderCC(); }
+  else if (mMode==='edit-cc')      { const d=loadCC(); d[mIdx]={name,value:val,color}; saveCC(d); renderCC(); }
+  else if (mMode==='rename-fixed') { ss(lk(mKey),name); document.getElementById('lbl-'+mKey).textContent=name; }
+  else if (mMode==='rename-sec')   { ss(snk(mKey),name); document.getElementById('sn-'+mKey).textContent=name; }
+  closeModal();
+}
+
+document.getElementById('modal-bg').addEventListener('click', e => {
+  if (e.target===e.currentTarget) closeModal();
+});
+document.addEventListener('keydown', e => {
+  if (e.key==='Enter') {
+    if (document.getElementById('modal-bg').classList.contains('open'))       doModal();
+    if (document.getElementById('init-modal-bg').classList.contains('open')) initPeriod();
+  }
+  if (e.key==='Escape') closeModal();
+});
+
+// ─── NAVEGAÇÃO DE MÊS ────────────────────────────────────────────
+function changeMonth(dir) {
+  cM += dir;
+  if (cM>11) { cM=0; cY++; }
+  if (cM<0)  { cM=11; cY--; }
+  loadUI();
+}
+
+// ─── GRÁFICO (canvas customizado) ────────────────────────────────
+function renderChart() {
+  const canvas = document.getElementById('chart-canvas');
+  if (!canvas || !canvas.parentElement) return;
+
+  const dpr = window.devicePixelRatio || 1;
+  const W   = canvas.parentElement.clientWidth || 700;
+  const H   = 280;
+  canvas.width        = W * dpr;
+  canvas.height       = H * dpr;
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const pm = cM===0 ? 11   : cM-1;
+  const py = cM===0 ? cY-1 : cY;
+
+  document.getElementById('chart-sub-label').textContent =
+    `${MONTHS[pm]} ${py}  →  ${MONTHS[cM]} ${cY}`;
+
+  const prevGastos = loadSecAt('fixas',py,pm).reduce((a,i)=>a+i.value, 0);
+  const currGastos = loadSec('fixas').reduce((a,i)=>a+i.value, 0);
+  const prevInvest = loadSecAt('investimentos',py,pm).reduce((a,i)=>a+(i.valor||0), 0);
+  const currInvest = loadSec('investimentos').reduce((a,i)=>a+(i.valor||0), 0);
+
+  // Fundo
+  ctx.fillStyle = '#161a23';
+  ctx.fillRect(0, 0, W, H);
+
+  const hasData = prevGastos||currGastos||prevInvest||currInvest;
+  if (!hasData) {
+    ctx.fillStyle = '#3a4160';
+    ctx.font = `14px 'DM Sans',sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText('Sem dados para exibir no período selecionado', W/2, H/2-10);
+    ctx.font = `12px 'DM Sans',sans-serif`;
+    ctx.fillStyle = '#2a3250';
+    ctx.fillText('Adicione gastos fixos ou investimentos para ver o comparativo', W/2, H/2+12);
+    return;
+  }
+
+  const C_PREV  = '#3a4160';
+  const C_GREEN = '#4caf7d';
+  const C_RED   = '#e05555';
+
+  // Gastos: menos = bom (verde), mais = ruim (vermelho)
+  const gastosColor = currGastos <= prevGastos ? C_GREEN : C_RED;
+  // Invest: mais = bom (verde), menos = ruim (vermelho)
+  const investColor = currInvest >= prevInvest ? C_GREEN : C_RED;
+
+  const PAD_T  = 42;
+  const PAD_B  = 72;
+  const chartH = H - PAD_T - PAD_B;
+  const maxVal = Math.max(prevGastos, currGastos, prevInvest, currInvest, 1) * 1.3;
+
+  // Linhas guia horizontais
+  for (let i=0; i<=4; i++) {
+    const y = PAD_T + (chartH/4)*i;
+    ctx.strokeStyle = i===4 ? 'rgba(42,48,68,0.9)' : 'rgba(42,48,68,0.4)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+  }
+
+  // Divisor central pontilhado
+  ctx.strokeStyle = 'rgba(42,48,68,0.5)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4,4]);
+  ctx.beginPath(); ctx.moveTo(W/2, PAD_T-4); ctx.lineTo(W/2, PAD_T+chartH+4); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Barra com cantos arredondados no topo
+  function roundedBar(x, y, w, h, r, color) {
+    if (h < 2) h = 2;
+    r = Math.min(r, w/2, h);
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.lineTo(x+w-r, y);
+    ctx.arcTo(x+w, y, x+w, y+r, r);
+    ctx.lineTo(x+w, y+h);
+    ctx.lineTo(x, y+h);
+    ctx.lineTo(x, y+r);
+    ctx.arcTo(x, y, x+r, y, r);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  const groupW = W / 2;
+  const barW   = Math.min(groupW * 0.22, 58);
+  const barGap = barW * 0.35;
+
+  function drawGroup(gIdx, prevVal, currVal, color, title) {
+    const gx = gIdx * groupW;
+    const cx = gx + groupW/2;
+    const x1 = cx - barW - barGap/2;
+    const x2 = cx + barGap/2;
+    const bh1 = (prevVal/maxVal) * chartH;
+    const bh2 = (currVal/maxVal) * chartH;
+
+    roundedBar(x1, PAD_T+chartH-bh1, barW, bh1, 4, C_PREV);
+    roundedBar(x2, PAD_T+chartH-bh2, barW, bh2, 4, color);
+
+    // Valores acima das barras
+    ctx.textAlign = 'center';
+    ctx.font = `600 11px 'DM Sans',sans-serif`;
+    ctx.fillStyle = '#8090a8';
+    if (prevVal > 0) ctx.fillText(fmt(prevVal), x1+barW/2, PAD_T+chartH-bh1-7);
+    ctx.fillStyle = color;
+    if (currVal > 0) ctx.fillText(fmt(currVal), x2+barW/2, PAD_T+chartH-bh2-7);
+    else { ctx.fillStyle='#5a6280'; ctx.fillText('R$ 0,00', x2+barW/2, PAD_T+chartH-7); }
+
+    // Título do grupo
+    ctx.fillStyle = '#6a7090';
+    ctx.font = `500 12px 'DM Sans',sans-serif`;
+    ctx.fillText(title, cx, PAD_T+chartH+18);
+
+    // Indicador de diferença
+    const diff    = currVal - prevVal;
+    const absDiff = Math.abs(diff);
+    const pct     = prevVal ? ((absDiff/prevVal)*100).toFixed(1) : null;
+    const arrow   = diff > 0 ? '▲' : diff < 0 ? '▼' : '●';
+    let diffStr   = diff===0 ? '● Sem variação' : arrow + ' ' + fmt(absDiff);
+    if (pct && diff!==0) diffStr += ` (${pct}%)`;
+    ctx.fillStyle = diff===0 ? '#5a6280' : color;
+    ctx.font = `600 11px 'DM Sans',sans-serif`;
+    ctx.fillText(diffStr, cx, PAD_T+chartH+36);
+  }
+
+  drawGroup(0, prevGastos, currGastos, gastosColor, 'Total de Gastos');
+  drawGroup(1, prevInvest, currInvest, investColor,  'Total Investido');
+
+  // Legenda
+  const ly = H - 13;
+  const lw = 230;
+  const lx = (W - lw) / 2;
+  ctx.fillStyle = C_PREV;
+  ctx.fillRect(lx, ly-10, 10, 10);
+  ctx.fillStyle = '#5a6280';
+  ctx.font = `11px 'DM Sans',sans-serif`;
+  ctx.textAlign = 'left';
+  ctx.fillText(`${MONTHS[pm]} ${py}`, lx+14, ly-1);
+
+  ctx.fillStyle = '#3a7050';
+  ctx.fillRect(lx+115, ly-10, 10, 10);
+  ctx.fillStyle = '#5a6280';
+  ctx.fillText(`${MONTHS[cM]} ${cY} (atual)`, lx+129, ly-1);
+}
+
+window.addEventListener('resize', () => {
+  if (!document.getElementById('init-modal-bg').classList.contains('open')) renderChart();
+});
+
+// ─── LOAD UI ─────────────────────────────────────────────────────
+function loadUI() {
+  document.getElementById('month-label').textContent    = `${MONTHS[cM]} ${cY}`;
+  document.getElementById('field-salario').value        = ls(fk('salario'),   'R$ 0,00');
+  document.getElementById('field-proventos').value      = ls(fk('proventos'), 'R$ 0,00');
+  document.getElementById('field-saldo').value          = ls(fk('saldo'),     'R$ 0,00');
+  ['salario','proventos','saldo'].forEach(k => {
+    const def = { salario:'Salário', proventos:'Demais Proventos', saldo:'Saldo em Conta na virada do mês' };
+    document.getElementById('lbl-'+k).textContent = ls(lk(k), def[k]);
+  });
+  ['fixas','cartao','ia'].forEach(s => {
+    const def = { fixas:'Gastos Fixos', cartao:'Contas parceladas no cartão', ia:'Gastos com IA' };
+    document.getElementById('sn-'+s).textContent = ls(snk(s), def[s]);
+  });
+  renderCC();
+  renderAll();
+}
+
+// ─── INIT ────────────────────────────────────────────────────────
+(function() {
+  const now = new Date();
+  document.getElementById('init-month').value = now.getMonth();
+  document.getElementById('init-year').value  = now.getFullYear();
+})();
+</script>
+</body>
+</html>
