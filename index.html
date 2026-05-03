@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Controle Financeiro</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
 :root {
   --bg:#0d0f14;--surface:#161a23;--surface2:#1e2331;
@@ -16,6 +17,7 @@
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;}
+body.loading .main-grid,body.loading #summary-grid{opacity:.5;pointer-events:none;transition:opacity .15s;}
 
 /* HEADER */
 header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;
@@ -464,7 +466,7 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
 
 </div><!-- /container -->
 
-<footer>Dados salvos localmente no navegador · Controle Financeiro Pessoal © 2026</footer>
+<footer>Dados sincronizados com Supabase · Controle Financeiro Pessoal © 2026</footer>
 
 <!-- ═══ MODAL GERAL ═══ -->
 <div class="modal-bg" id="modal-bg">
@@ -498,26 +500,81 @@ let cY = new Date().getFullYear();
 let cM = new Date().getMonth();
 let mMode = 'add', mKey = null, mIdx = null;
 
-// ─── STORAGE ─────────────────────────────────────────────────────
-const sk  = s => `fin_${cY}_${cM}_${s}`;
-const fk  = k => `fin_f_${cY}_${cM}_${k}`;
-const lk  = k => `fin_lbl_${k}`;
-const snk = s => `fin_sn_${s}`;
-const cck = () => `fin_cc_${cY}_${cM}`;
+// ─── SUPABASE ─────────────────────────────────────────────────────
+const _sb = supabase.createClient(
+  'https://xigdzgvingsmqzyxvpfz.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhpZ2R6Z3ZpbmdzbXF6eXh2cGZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3ODYyNTcsImV4cCI6MjA5MzM2MjI1N30.sNYkGahr8Fj_IGWjLQN-GQQ9_Y7JjQBCHx34g0ZncpQ'
+);
 
-function ls(k,d)   { const r=localStorage.getItem(k); return r===null?d:r; }
-function lsj(k,d)  { const r=localStorage.getItem(k); return r?JSON.parse(r):d; }
-function ss(k,v)   { localStorage.setItem(k,v); }
-function ssj(k,v)  { localStorage.setItem(k,JSON.stringify(v)); }
-function saveField(k,v) { ss(fk(k),v); }
+// ─── ESTADO ───────────────────────────────────────────────────────
+const state = {
+  secoes:     { fixas:[], cartao:[], ia:[], investimentos:[] },
+  prevSecoes: { fixas:[], investimentos:[] },
+  campos:     { salario:'R$ 0,00', proventos:'R$ 0,00', saldo:'R$ 0,00' },
+  cards:      [],
+  config:     {},
+};
 
-// ─── DADOS ───────────────────────────────────────────────────────
-const DEFAULTS = { fixas:[], cartao:[], ia:[], investimentos:[] };
-function loadSec(s)            { return lsj(sk(s), JSON.parse(JSON.stringify(DEFAULTS[s]||[]))); }
-function saveSec(s,d)          { ssj(sk(s),d); }
-function loadSecAt(s,y,m)      { return lsj(`fin_${y}_${m}_${s}`,[]); }
-function loadCC()              { return lsj(cck(),[]); }
-function saveCC(d)             { ssj(cck(),d); }
+// ─── DB ───────────────────────────────────────────────────────────
+const db = {
+  async loadMonth(y, m) {
+    const pm = m===0 ? 11 : m-1;
+    const py = m===0 ? y-1 : y;
+    const [secRes, camposRes, cardsRes, prevRes] = await Promise.all([
+      _sb.from('fin_secoes').select('secao,items').eq('ano',y).eq('mes',m),
+      _sb.from('fin_campos').select('salario,proventos,saldo').eq('ano',y).eq('mes',m).maybeSingle(),
+      _sb.from('fin_cards').select('cards').eq('ano',y).eq('mes',m).maybeSingle(),
+      _sb.from('fin_secoes').select('secao,items').eq('ano',py).eq('mes',pm).in('secao',['fixas','investimentos']),
+    ]);
+    const secoes = { fixas:[], cartao:[], ia:[], investimentos:[] };
+    (secRes.data||[]).forEach(r => { secoes[r.secao] = r.items; });
+    const prevSecoes = { fixas:[], investimentos:[] };
+    (prevRes.data||[]).forEach(r => { prevSecoes[r.secao] = r.items; });
+    return {
+      secoes,
+      prevSecoes,
+      campos: camposRes.data || { salario:'R$ 0,00', proventos:'R$ 0,00', saldo:'R$ 0,00' },
+      cards: cardsRes.data?.cards || [],
+    };
+  },
+  async loadConfig() {
+    const { data } = await _sb.from('fin_config').select('key,value');
+    const cfg = {};
+    (data||[]).forEach(r => { cfg[r.key] = r.value; });
+    return cfg;
+  },
+  saveSec(y, m, s, items) {
+    _sb.from('fin_secoes').upsert({ ano:y, mes:m, secao:s, items }, { onConflict:'ano,mes,secao' })
+      .then(({error}) => { if (error) console.error('Erro ao salvar seção:', error); });
+  },
+  saveCampos(y, m, campos) {
+    _sb.from('fin_campos').upsert({ ano:y, mes:m, ...campos }, { onConflict:'ano,mes' })
+      .then(({error}) => { if (error) console.error('Erro ao salvar campos:', error); });
+  },
+  saveCards(y, m, cards) {
+    _sb.from('fin_cards').upsert({ ano:y, mes:m, cards }, { onConflict:'ano,mes' })
+      .then(({error}) => { if (error) console.error('Erro ao salvar cards:', error); });
+  },
+  saveConfig(key, value) {
+    _sb.from('fin_config').upsert({ key, value }, { onConflict:'key' })
+      .then(({error}) => { if (error) console.error('Erro ao salvar config:', error); });
+  },
+};
+
+// ─── STORAGE (state + Supabase) ───────────────────────────────────
+function loadSec(s)   { return state.secoes[s] ?? []; }
+function saveSec(s,d) { state.secoes[s]=d; db.saveSec(cY,cM,s,d); }
+function loadSecAt(s,y,m) {
+  const pm = cM===0 ? 11 : cM-1;
+  const py = cM===0 ? cY-1 : cY;
+  if (y===py && m===pm) return state.prevSecoes[s] ?? [];
+  return [];
+}
+function loadCC()    { return state.cards; }
+function saveCC(d)   { state.cards=d; db.saveCards(cY,cM,d); }
+function cfgGet(key, def) { return key in state.config ? state.config[key] : def; }
+function cfgSet(key, val) { state.config[key]=val; db.saveConfig(key,val); }
+function saveField(k,v)   { state.campos[k]=v; db.saveCampos(cY,cM,state.campos); }
 
 // ─── FORMATAÇÃO ──────────────────────────────────────────────────
 function fmt(n) {
@@ -632,8 +689,6 @@ function updCC(i,v) { const d=loadCC(); d[i].value=v; saveCC(d); }
 function delCC(i)   { if(!confirm('Remover card?')) return; const d=loadCC(); d.splice(i,1); saveCC(d); renderCC(); }
 
 // ─── RECALC ──────────────────────────────────────────────────────
-// Apenas "fixas" afeta o Total de Gastos e a Sobra.
-// Saldo em conta (pode ser negativo) também entra na Sobra.
 function recalc() {
   const grand = loadSec('fixas').reduce((a,i)=>a+i.value, 0);
   const sal   = parse(document.getElementById('field-salario').value);
@@ -667,10 +722,10 @@ function togglePaid(s,i) {
   renderSec(s);
 }
 function addItem(s) {
-  const name  = document.getElementById('nf-'+s).value.trim();
-  const val   = parse(document.getElementById('vf-'+s).value);
-  const obs   = (document.getElementById('of-'+s)||{}).value||'';
-  const isP   = document.getElementById('pcheck-'+s)?.checked||false;
+  const name   = document.getElementById('nf-'+s).value.trim();
+  const val    = parse(document.getElementById('vf-'+s).value);
+  const obs    = (document.getElementById('of-'+s)||{}).value||'';
+  const isP    = document.getElementById('pcheck-'+s)?.checked||false;
   const pAtual = parseInt(document.getElementById('pa-'+s)?.value)||1;
   const pTotal = parseInt(document.getElementById('pt-'+s)?.value)||1;
   if (!name) return;
@@ -724,35 +779,35 @@ function replicarMes() {
   )) return;
 
   ['fixas','cartao','ia','investimentos'].forEach(s => {
-    const curr = loadSecAt(s, cY, cM);
+    const curr = loadSec(s);
     const next = [];
     curr.forEach(item => {
       if (item.parcela && item.parcela.ativo) {
-        if (item.parcela.atual >= item.parcela.total) return; // descarta
+        if (item.parcela.atual >= item.parcela.total) return;
         next.push({ ...item, id:Date.now()+Math.random(), paid:false,
           parcela: { ...item.parcela, atual: item.parcela.atual+1 } });
       } else {
         next.push({ ...item, id:Date.now()+Math.random(), paid:false });
       }
     });
-    localStorage.setItem(`fin_${ny}_${nm}_${s}`, JSON.stringify(next));
+    db.saveSec(ny, nm, s, next);
   });
 
-  // Replica salário e proventos — não replica saldo (específico da virada)
-  ['salario','proventos'].forEach(k => {
-    const v = localStorage.getItem(`fin_f_${cY}_${cM}_${k}`);
-    if (v) localStorage.setItem(`fin_f_${ny}_${nm}_${k}`, v);
+  db.saveCampos(ny, nm, {
+    salario: state.campos.salario,
+    proventos: state.campos.proventos,
+    saldo: 'R$ 0,00',
   });
 
   alert(`✓ Dados replicados para ${MONTHS[nm]} ${ny}!\nUse as setas do cabeçalho para navegar.`);
 }
 
 // ─── MODAL INICIAL ───────────────────────────────────────────────
-function initPeriod() {
+async function initPeriod() {
   cM = parseInt(document.getElementById('init-month').value);
   cY = parseInt(document.getElementById('init-year').value) || new Date().getFullYear();
   document.getElementById('init-modal-bg').classList.remove('open');
-  loadUI();
+  await loadUI();
 }
 
 // ─── MODAL GERAL ─────────────────────────────────────────────────
@@ -791,7 +846,7 @@ function openEditCC(i) {
 function openRenameFixed(k) {
   mMode='rename-fixed'; mKey=k;
   document.getElementById('modal-title').textContent = 'Renomear';
-  document.getElementById('m-name').value = ls(lk(k), {
+  document.getElementById('m-name').value = cfgGet('lbl_'+k, {
     salario:'Salário', proventos:'Demais Proventos', saldo:'Saldo em Conta na virada do mês'
   }[k]);
   showFields(false,false); openModal();
@@ -799,7 +854,7 @@ function openRenameFixed(k) {
 function openRenameSection(s) {
   mMode='rename-sec'; mKey=s;
   document.getElementById('modal-title').textContent = 'Renomear Seção';
-  document.getElementById('m-name').value = ls(snk(s), {
+  document.getElementById('m-name').value = cfgGet('sn_'+s, {
     fixas:'Gastos Fixos', cartao:'Contas parceladas no cartão', ia:'Gastos com IA'
   }[s]);
   showFields(false,false); openModal();
@@ -811,8 +866,8 @@ function doModal() {
   if (!name) return;
   if      (mMode==='add')          { const d=loadCC(); d.push({name,value:val,color}); saveCC(d); renderCC(); }
   else if (mMode==='edit-cc')      { const d=loadCC(); d[mIdx]={name,value:val,color}; saveCC(d); renderCC(); }
-  else if (mMode==='rename-fixed') { ss(lk(mKey),name); document.getElementById('lbl-'+mKey).textContent=name; }
-  else if (mMode==='rename-sec')   { ss(snk(mKey),name); document.getElementById('sn-'+mKey).textContent=name; }
+  else if (mMode==='rename-fixed') { cfgSet('lbl_'+mKey,name); document.getElementById('lbl-'+mKey).textContent=name; }
+  else if (mMode==='rename-sec')   { cfgSet('sn_'+mKey,name); document.getElementById('sn-'+mKey).textContent=name; }
   closeModal();
 }
 
@@ -828,14 +883,14 @@ document.addEventListener('keydown', e => {
 });
 
 // ─── NAVEGAÇÃO DE MÊS ────────────────────────────────────────────
-function changeMonth(dir) {
+async function changeMonth(dir) {
   cM += dir;
   if (cM>11) { cM=0; cY++; }
   if (cM<0)  { cM=11; cY--; }
-  loadUI();
+  await loadUI();
 }
 
-// ─── GRÁFICO (canvas customizado) ────────────────────────────────
+// ─── GRÁFICO ─────────────────────────────────────────────────────
 function renderChart() {
   const canvas = document.getElementById('chart-canvas');
   if (!canvas || !canvas.parentElement) return;
@@ -862,7 +917,6 @@ function renderChart() {
   const prevInvest = loadSecAt('investimentos',py,pm).reduce((a,i)=>a+(i.valor||0), 0);
   const currInvest = loadSec('investimentos').reduce((a,i)=>a+(i.valor||0), 0);
 
-  // Fundo
   ctx.fillStyle = '#161a23';
   ctx.fillRect(0, 0, W, H);
 
@@ -882,9 +936,7 @@ function renderChart() {
   const C_GREEN = '#4caf7d';
   const C_RED   = '#e05555';
 
-  // Gastos: menos = bom (verde), mais = ruim (vermelho)
   const gastosColor = currGastos <= prevGastos ? C_GREEN : C_RED;
-  // Invest: mais = bom (verde), menos = ruim (vermelho)
   const investColor = currInvest >= prevInvest ? C_GREEN : C_RED;
 
   const PAD_T  = 42;
@@ -892,7 +944,6 @@ function renderChart() {
   const chartH = H - PAD_T - PAD_B;
   const maxVal = Math.max(prevGastos, currGastos, prevInvest, currInvest, 1) * 1.3;
 
-  // Linhas guia horizontais
   for (let i=0; i<=4; i++) {
     const y = PAD_T + (chartH/4)*i;
     ctx.strokeStyle = i===4 ? 'rgba(42,48,68,0.9)' : 'rgba(42,48,68,0.4)';
@@ -900,14 +951,12 @@ function renderChart() {
     ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
   }
 
-  // Divisor central pontilhado
   ctx.strokeStyle = 'rgba(42,48,68,0.5)';
   ctx.lineWidth = 1;
   ctx.setLineDash([4,4]);
   ctx.beginPath(); ctx.moveTo(W/2, PAD_T-4); ctx.lineTo(W/2, PAD_T+chartH+4); ctx.stroke();
   ctx.setLineDash([]);
 
-  // Barra com cantos arredondados no topo
   function roundedBar(x, y, w, h, r, color) {
     if (h < 2) h = 2;
     r = Math.min(r, w/2, h);
@@ -939,7 +988,6 @@ function renderChart() {
     roundedBar(x1, PAD_T+chartH-bh1, barW, bh1, 4, C_PREV);
     roundedBar(x2, PAD_T+chartH-bh2, barW, bh2, 4, color);
 
-    // Valores acima das barras
     ctx.textAlign = 'center';
     ctx.font = `600 11px 'DM Sans',sans-serif`;
     ctx.fillStyle = '#8090a8';
@@ -948,12 +996,10 @@ function renderChart() {
     if (currVal > 0) ctx.fillText(fmt(currVal), x2+barW/2, PAD_T+chartH-bh2-7);
     else { ctx.fillStyle='#5a6280'; ctx.fillText('R$ 0,00', x2+barW/2, PAD_T+chartH-7); }
 
-    // Título do grupo
     ctx.fillStyle = '#6a7090';
     ctx.font = `500 12px 'DM Sans',sans-serif`;
     ctx.fillText(title, cx, PAD_T+chartH+18);
 
-    // Indicador de diferença
     const diff    = currVal - prevVal;
     const absDiff = Math.abs(diff);
     const pct     = prevVal ? ((absDiff/prevVal)*100).toFixed(1) : null;
@@ -968,7 +1014,6 @@ function renderChart() {
   drawGroup(0, prevGastos, currGastos, gastosColor, 'Total de Gastos');
   drawGroup(1, prevInvest, currInvest, investColor,  'Total Investido');
 
-  // Legenda
   const ly = H - 13;
   const lw = 230;
   const lx = (W - lw) / 2;
@@ -990,28 +1035,40 @@ window.addEventListener('resize', () => {
 });
 
 // ─── LOAD UI ─────────────────────────────────────────────────────
-function loadUI() {
-  document.getElementById('month-label').textContent    = `${MONTHS[cM]} ${cY}`;
-  document.getElementById('field-salario').value        = ls(fk('salario'),   'R$ 0,00');
-  document.getElementById('field-proventos').value      = ls(fk('proventos'), 'R$ 0,00');
-  document.getElementById('field-saldo').value          = ls(fk('saldo'),     'R$ 0,00');
+async function loadUI() {
+  document.body.classList.add('loading');
+  document.getElementById('month-label').textContent = `${MONTHS[cM]} ${cY}`;
+
+  const data = await db.loadMonth(cY, cM);
+  state.secoes     = data.secoes;
+  state.prevSecoes = data.prevSecoes;
+  state.campos     = data.campos;
+  state.cards      = data.cards;
+
+  document.getElementById('field-salario').value   = state.campos.salario   || 'R$ 0,00';
+  document.getElementById('field-proventos').value = state.campos.proventos || 'R$ 0,00';
+  document.getElementById('field-saldo').value     = state.campos.saldo     || 'R$ 0,00';
+
+  const lblDef = { salario:'Salário', proventos:'Demais Proventos', saldo:'Saldo em Conta na virada do mês' };
   ['salario','proventos','saldo'].forEach(k => {
-    const def = { salario:'Salário', proventos:'Demais Proventos', saldo:'Saldo em Conta na virada do mês' };
-    document.getElementById('lbl-'+k).textContent = ls(lk(k), def[k]);
+    document.getElementById('lbl-'+k).textContent = cfgGet('lbl_'+k, lblDef[k]);
   });
+  const snDef = { fixas:'Gastos Fixos', cartao:'Contas parceladas no cartão', ia:'Gastos com IA' };
   ['fixas','cartao','ia'].forEach(s => {
-    const def = { fixas:'Gastos Fixos', cartao:'Contas parceladas no cartão', ia:'Gastos com IA' };
-    document.getElementById('sn-'+s).textContent = ls(snk(s), def[s]);
+    document.getElementById('sn-'+s).textContent = cfgGet('sn_'+s, snDef[s]);
   });
+
   renderCC();
   renderAll();
+  document.body.classList.remove('loading');
 }
 
 // ─── INIT ────────────────────────────────────────────────────────
-(function() {
+(async function() {
   const now = new Date();
   document.getElementById('init-month').value = now.getMonth();
   document.getElementById('init-year').value  = now.getFullYear();
+  state.config = await db.loadConfig();
 })();
 </script>
 </body>
