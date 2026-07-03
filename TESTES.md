@@ -14,31 +14,46 @@ Marque `[x]` conforme for validando. Ambiente: abrir o `index.html` no navegador
 virar o padrão brasileiro `R$ 1.234,56`. Sempre usar **vírgula** para centavos.
 
 ### Cards do topo
-- [ ] **Salário:** digitar `5587,22` → deve virar `R$ 5.587,22`.
-- [ ] **Salário:** digitar `500` → deve virar `R$ 500,00`.
-- [ ] **Demais Proventos:** digitar `1200,5` → deve virar `R$ 1.200,50`.
-- [ ] **Saldo em Conta:** digitar `-300` → deve virar `-R$ 300,00` (aceita negativo).
-- [ ] **Saldo em Conta:** digitar `1000` → deve virar `R$ 1.000,00`.
-- [ ] Após formatar, o card **Sobra do Mês** recalcula corretamente.
+
+- [x] **Salário:** digitar `5587,22` → deve virar `R$ 5.587,22`.
+- [x] **Salário:** digitar `500` → deve virar `R$ 500,00`.
+- [x] **Demais Proventos:** digitar `1200,5` → deve virar `R$ 1.200,50`.
+- [x] **Saldo em Conta:** digitar `-300` → deve virar `-R$ 300,00` (aceita negativo).
+- [x] **Saldo em Conta:** digitar `1000` → deve virar `R$ 1.000,00`.
+- [x] Após formatar, o card **Sobra do Mês** recalcula corretamente.
+
+
 
 ### Tabelas de gastos (Gastos Fixos, Cartão, IA)
-- [ ] Adicionar um item com valor `824,04` → na coluna Valor aparece `R$ 824,04`.
-- [ ] Editar o valor de uma linha para `1250` → ao sair do campo vira `R$ 1.250,00`.
-- [ ] O **total** da seção (badge no cabeçalho) atualiza junto e bate a soma.
+
+- [x] Adicionar um item com valor `824,04` → na coluna Valor aparece `R$ 824,04`.
+- [x] Editar o valor de uma linha para `1250` → ao sair do campo vira `R$ 1.250,00`.
+- [x] O **total** da seção (badge no cabeçalho) atualiza junto e bate a soma.
+
+
 
 ### Investimentos
-- [ ] Adicionar investimento com valor `500` → aparece `R$ 500,00`.
-- [ ] Editar para `2192` → vira `R$ 2.192,00`.
+
+- [x] Adicionar investimento com valor `500` → aparece `R$ 500,00`.
+- [x] Editar para `2192` → vira `R$ 2.192,00`.
+
+
 
 ### Cards personalizados
-- [ ] Criar um novo card com valor `300` → mostra `R$ 300,00`.
-- [ ] Editar o valor inline para `450,9` → vira `R$ 450,90`.
+
+- [x] Criar um novo card com valor `300` → mostra `R$ 300,00`.
+- [x] Editar o valor inline para `450,9` → vira `R$ 450,90`.
+
+
 
 ### Verificação geral
-- [ ] Recarregar a página (F5) e reabrir o mês: todos os valores continuam formatados.
-- [ ] Nenhum erro no Console do navegador (F12 → aba Console).
+
+- [x] Recarregar a página (F5) e reabrir o mês: todos os valores continuam formatados.
+- [x] Nenhum erro no Console do navegador (F12 → aba Console).
 
 ---
+
+
 
 ## ✅ Item 2 — Botão de editar parcela nas linhas
 
@@ -46,45 +61,66 @@ virar o padrão brasileiro `R$ 1.234,56`. Sempre usar **vírgula** para centavos
 (lápis) que abre um modal para editar a parcela. Investimentos **não** tem esse botão.
 
 ### Botão e modal
-- [ ] Em cada linha de Gastos Fixos há 3 botões: ✎ (parcela), ✓ (pago), × (remover).
-- [ ] A tabela de **Investimentos** NÃO mostra o botão ✎ (só × de remover).
-- [ ] Clicar no ✎ abre o modal "Editar Parcela" mostrando o nome do item.
+
+- [x] Em cada linha de Gastos Fixos há 3 botões: ✎ (parcela), ✓ (pago), × (remover).
+- [x] A tabela de **Investimentos** NÃO mostra o botão ✎ (só × de remover).
+- [x] Clicar no ✎ abre o modal "Editar Parcela" mostrando o nome do item.
+
+
 
 ### Editar parcela existente
-- [ ] Abrir o ✎ de um item já parcelado (ex.: 3/12): o modal vem com "Parcelado?" marcado
-      e os campos preenchidos (Atual=3, De=12).
-- [ ] Mudar Atual para `5` e salvar → o selo na linha vira `5/12`.
+
+- [x] Abrir o ✎ de um item já parcelado (ex.: 3/12): o modal vem com "Parcelado?" marcado
+  ```
+  e os campos preenchidos (Atual=3, De=12).
+  ```
+- [x] Mudar Atual para `5` e salvar → o selo na linha vira `5/12`.
+
+
 
 ### Ativar/desativar parcelamento
-- [ ] Abrir o ✎ de um item comum (sem parcela): "Parcelado?" vem desmarcado e os campos escondidos.
-- [ ] Marcar "Parcelado?" → aparecem os campos Atual/De. Preencher `1` e `10`, salvar → selo vira `1/10`.
-- [ ] Reabrir um item parcelado, desmarcar "Parcelado?" e salvar → o selo vira `—`.
+
+- [x] Abrir o ✎ de um item comum (sem parcela): "Parcelado?" vem desmarcado e os campos escondidos.
+- [x] Marcar "Parcelado?" → aparecem os campos Atual/De. Preencher `1` e `10`, salvar → selo vira `1/10`.
+- [x] Reabrir um item parcelado, desmarcar "Parcelado?" e salvar → o selo vira `—`.
+
+
 
 ### Validações
-- [ ] Colocar Atual `8` e De `3` e salvar → total é corrigido para no mínimo o valor atual (8/8).
-- [ ] Botão **Cancelar** (ou tecla Esc) fecha sem alterar nada.
-- [ ] Tecla **Enter** dentro do modal salva.
-- [ ] Recarregar a página: a parcela editada persiste (salva no Supabase).
+
+- [x] ~~Colocar Atual `8` e De `3` e salvar → total é corrigido para 8/8.~~
+      **(comportamento alterado — ver Rodada 2, item C)**
+- [x] Botão **Cancelar** (ou tecla Esc) fecha sem alterar nada.
+- [x] Tecla **Enter** dentro do modal salva.
+- [x] Recarregar a página: a parcela editada persiste (salva no Supabase).
 
 ---
+
+
 
 ## ✅ Item 3 — Cards "Já Pago" e "A Pagar" (Gastos Fixos)
 
 **Regra:** nos cards do topo, além de "Total de Gastos", há 2 novos cards:
 **Gastos Fixos · Já Pago** (verde) e **Gastos Fixos · A Pagar** (dourado).
+
 - Já Pago = soma das linhas de Gastos Fixos marcadas com ✓.
 - A Pagar = Total de Gastos − Já Pago.
 
+
+
 ### Testes
-- [ ] Com nenhum item pago: Já Pago = `R$ 0,00` e A Pagar = igual ao Total de Gastos.
-- [ ] Marcar ✓ em um item de `R$ 500,00` → Já Pago sobe `R$ 500,00` e A Pagar desce `R$ 500,00`.
-- [ ] Marcar todos os itens como pagos → Já Pago = Total e A Pagar = `R$ 0,00`.
-- [ ] Desmarcar um item → os valores voltam corretamente.
-- [ ] Editar o valor de um item já pago → Já Pago e A Pagar recalculam.
-- [ ] Marcar ✓ em itens de **Cartão** ou **IA** NÃO afeta esses cards (são só de Gastos Fixos).
-- [ ] Recarregar a página: os valores continuam corretos.
+
+- [x] Com nenhum item pago: Já Pago = `R$ 0,00` e A Pagar = igual ao Total de Gastos.
+- [x] Marcar ✓ em um item de `R$ 500,00` → Já Pago sobe `R$ 500,00` e A Pagar desce `R$ 500,00`.
+- [x] Marcar todos os itens como pagos → Já Pago = Total e A Pagar = `R$ 0,00`.
+- [x] Desmarcar um item → os valores voltam corretamente.
+- [x] Editar o valor de um item já pago → Já Pago e A Pagar recalculam.
+- [x] Marcar ✓ em itens de **Cartão** ou **IA** NÃO afeta esses cards (são só de Gastos Fixos).
+- [x] Recarregar a página: os valores continuam corretos.
 
 ---
+
+
 
 ## ✅ Item 4 — Menu lateral com abas (novo layout)
 
@@ -93,29 +129,47 @@ Gastos com IA, Investimentos. A área principal mostra só a aba ativa. Os cards
 ficam sempre no topo. O gráfico fica na aba Gastos Fixos.
 
 ### Navegação
-- [ ] Ao entrar, a aba **Gastos Fixos** já vem selecionada (destacada em dourado).
-- [ ] Clicar em cada item do menu troca o conteúdo mostrado, e só um fica ativo por vez.
-- [ ] Os **cards de resumo** (Total, Já Pago, A Pagar, Salário, Proventos, Sobra, Saldo)
-      continuam visíveis em **todas** as abas.
-- [ ] O **gráfico Comparativo Mensal** aparece só na aba **Gastos Fixos** (abaixo da tabela)
-      e é desenhado com a largura correta ao abrir essa aba.
-- [ ] A aba do cartão mostra o título "Contas parceladas e fixas no cartão".
+
+- [x] Ao entrar, a aba **Gastos Fixos** já vem selecionada (destacada em dourado).
+- [x] Clicar em cada item do menu troca o conteúdo mostrado, e só um fica ativo por vez.
+- [x] Os **cards de resumo** (Total, Já Pago, A Pagar, Salário, Proventos, Sobra, Saldo)
+  ```
+  continuam visíveis em **todas** as abas.
+  ```
+- [x] O **gráfico Comparativo Mensal** aparece só na aba **Gastos Fixos** (abaixo da tabela)
+  ```
+  e é desenhado com a largura correta ao abrir essa aba.
+  ```
+- [x] A aba do cartão mostra o título "Contas parceladas e fixas no cartão".
+
+
 
 ### Cálculo (não mudou)
-- [ ] Só os **Gastos Fixos** influenciam a Sobra do Mês. Cartão, IA e Investimentos
-      continuam consultivos (não entram na conta final).
+
+- [x] Só os **Gastos Fixos** influenciam a Sobra do Mês. Cartão, IA e Investimentos
+  ```
+  continuam consultivos (não entram na conta final).
+  ```
+
+
 
 ### Responsivo (celular / tela estreita < 860px)
-- [ ] Aparece o botão **☰** no topo à esquerda.
-- [ ] Clicar no ☰ abre o menu lateral por cima, com um fundo escurecido (overlay).
-- [ ] Clicar num item do menu ou no fundo escuro fecha o menu.
-- [ ] No desktop (tela larga) o menu fica fixo à esquerda, sem o botão ☰.
+
+- [x] Aparece o botão **☰** no topo à esquerda.
+- [x] Clicar no ☰ abre o menu lateral por cima, com um fundo escurecido (overlay).
+- [x] Clicar num item do menu ou no fundo escuro fecha o menu.
+- [x] No desktop (tela larga) o menu fica fixo à esquerda, sem o botão ☰.
+
+
 
 ### Verificação geral
-- [ ] Trocar de mês (setas do topo) funciona normalmente em qualquer aba.
-- [ ] Nenhum erro no Console (F12).
+
+- [x] Trocar de mês (setas do topo) funciona normalmente em qualquer aba.
+- [x] Nenhum erro no Console (F12).
 
 ---
+
+
 
 ## ✅ Item 5 — Aba "Faturas de Cartão de Crédito" (upload)
 
@@ -124,31 +178,103 @@ ficam sempre no topo. O gráfico fica na aba Gastos Fixos.
 > `fin_faturas`, o bucket `faturas` e as políticas de acesso. Sem isso, a aba
 > mostra a mensagem "Já rodou o script SQL de setup?".
 
+
+
 ### Passo a passo do Supabase (fazer 1 vez)
+
 1. [ ] Abrir o projeto no [Supabase](https://supabase.com) → **SQL Editor** → **New query**.
 2. [ ] Colar o conteúdo de `supabase-setup-faturas.sql` e clicar em **Run**.
 3. [ ] Ver a mensagem de sucesso (sem erros em vermelho).
 4. [ ] (Opcional) Conferir em **Storage** que existe um bucket chamado `faturas`.
 
+
+
 ### Upload
-- [ ] Abrir a aba **Faturas de Cartão de Crédito** no menu.
-- [ ] Preencher "Cartão" (ex.: Nubank), escolher um **PDF** e clicar **Enviar fatura**.
-- [ ] Aparece "Enviando…" e depois "✓ Fatura enviada!"; a fatura surge na tabela abaixo.
-- [ ] Repetir com uma **imagem** (JPG/PNG) → também deve funcionar.
-- [ ] Tentar enviar sem escolher arquivo → mensagem "Selecione um arquivo."
-- [ ] Tentar enviar um arquivo não permitido (ex.: .txt) → mensagem "Tipo não permitido."
+
+- [x] Abrir a aba **Faturas de Cartão de Crédito** no menu.
+- [x] Preencher "Cartão" (ex.: Nubank), escolher um **PDF** e clicar **Enviar fatura**.
+- [x] Aparece "Enviando…" e depois "✓ Fatura enviada!"; a fatura surge na tabela abaixo.
+- [x] Repetir com uma **imagem** (JPG/PNG) → também deve funcionar.
+- [x] Tentar enviar sem escolher arquivo → mensagem "Selecione um arquivo."
+- [x] Tentar enviar um arquivo não permitido (ex.: .txt) → mensagem "Tipo não permitido."
+
+
 
 ### Organização por mês + cartão
-- [ ] A lista mostra Cartão, nome do Arquivo e data/hora do envio.
-- [ ] Trocar para outro mês (setas do topo) → a lista mostra as faturas daquele mês
-      (faturas de meses diferentes não se misturam).
-- [ ] Enviar 2 cartões diferentes no mesmo mês → ambos aparecem na lista.
+
+- [x] A lista mostra Cartão, nome do Arquivo e data/hora do envio.
+- [x] Trocar para outro mês (setas do topo) → a lista mostra as faturas daquele mês
+  ```
+  (faturas de meses diferentes não se misturam).
+  ```
+- [x] Enviar 2 cartões diferentes no mesmo mês → ambos aparecem na lista.
+
+
 
 ### Abrir e remover
-- [ ] Clicar no botão **↗** de uma fatura → abre o arquivo numa nova aba do navegador.
-- [ ] Clicar no **×** → pede confirmação e, ao confirmar, remove da lista (e do Storage).
-- [ ] Recarregar a página: as faturas enviadas continuam lá.
+
+- [x] Clicar no botão **↗** de uma fatura → abre o arquivo numa nova aba do navegador.
+- [x] Clicar no **×** → pede confirmação e, ao confirmar, remove da lista (e do Storage).
+- [x] Recarregar a página: as faturas enviadas continuam lá.
+
+
 
 ### Observação (fase futura)
+
 - A **IA que lê a fatura** ainda NÃO foi implementada — faremos isso depois, definindo
-  juntos o que ela deve filtrar (iFood, combustível, mercado, etc.).
+juntos o que ela deve filtrar (iFood, combustível, mercado, etc.).
+
+---
+---
+
+# 🧪 RODADA 2 — Novas alterações
+
+## A — Campos de valor: só números + limite de R$ 999.999,99
+
+**Regra:** não é possível digitar letras em campos de valor. O máximo é `R$ 999.999,99`
+(8 dígitos). Acima disso, aparece um aviso (toast vermelho na base da tela) e o valor
+**não é aceito** (o campo volta ao valor anterior).
+
+- [ ] Tentar digitar letras em Salário / valor de gasto / investimento / card → letras não entram.
+- [ ] Digitar `1000000` (um milhão) em qualquer campo de valor → aparece o aviso
+      "Valor máximo permitido: R$ 999.999,99" e o campo volta ao valor anterior.
+- [ ] Digitar `999999,99` → é aceito e vira `R$ 999.999,99`.
+- [ ] Testar o limite em: card de topo (Salário), tabela (Gasto Fixo), Investimento,
+      card personalizado e no formulário "+ Adicionar".
+- [ ] Saldo em Conta ainda aceita o sinal de menos (ex.: `-500`).
+
+## B — Card com opção de influenciar a Sobra do Mês
+
+**Regra:** ao criar/editar um card, há a opção "Este card entra no cálculo da Sobra".
+Se ligada, você escolhe **+ Soma (receita)** ou **− Subtrai (despesa)**.
+
+- [ ] Criar card "BICO" = `R$ 500,00`, marcar influência, escolher **+ Soma** → a
+      **Sobra do Mês** aumenta em R$ 500,00 e o card mostra o selo "↑ Sobra" (verde).
+- [ ] Criar card "EXTRA" = `R$ 200,00`, influência **− Subtrai** → a Sobra diminui
+      R$ 200,00 e o card mostra "↓ Sobra" (vermelho).
+- [ ] Criar card SEM marcar influência → não altera a Sobra e não tem selo.
+- [ ] Editar o valor de um card que influencia (inline) → a Sobra recalcula.
+- [ ] Remover um card que influencia → a Sobra volta ao valor sem ele.
+- [ ] Recarregar a página: a configuração de influência persiste.
+
+## C — Parcela: erro quando atual > total
+
+**Regra:** no modal de editar parcela, se a parcela atual for maior que o total,
+aparece uma mensagem vermelha embaixo e **não salva**.
+
+- [ ] Abrir editar parcela, marcar Parcelado, colocar Atual `8` e De `3`, clicar Salvar →
+      mensagem vermelha "Não é possível: a parcela atual é maior que o número de parcelas."
+      e o modal continua aberto (não salvou).
+- [ ] Corrigir para Atual `3` e De `8` → salva normal (3/8) e a mensagem some.
+
+## D — Modal de parcela não fecha ao clicar fora
+
+- [ ] Abrir o modal de editar parcela e clicar **fora** dele (na área escura) → NÃO fecha.
+- [ ] Fecha apenas clicando em **Cancelar** ou **Salvar**. (A tecla Esc também cancela.)
+
+## E — Sem botão "Pago" em Cartão e Gastos com IA
+
+- [ ] Nas linhas de **Contas parceladas e fixas no cartão**: só os botões ✎ (parcela) e × (remover).
+- [ ] Nas linhas de **Gastos com IA**: só ✎ e ×.
+- [ ] Em **Gastos Fixos**: continua com ✎, ✓ (pago) e ×.
+

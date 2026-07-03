@@ -248,6 +248,29 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
 #fat-status{padding:0 16px;}
 #fat-status p{padding:8px 0;font-size:13px;margin:0;}
 
+/* toast de aviso (limite de valor, etc.) */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--red);color:#fff;padding:11px 18px;border-radius:9px;font-size:13px;
+  font-weight:500;z-index:600;opacity:0;pointer-events:none;max-width:90vw;text-align:center;
+  transition:opacity .2s,transform .2s;box-shadow:0 6px 24px rgba(0,0,0,.4);}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* seletor + / - (influência do card na Sobra) */
+.seg{display:flex;gap:6px;}
+.seg-btn{flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--muted);
+  padding:7px 8px;border-radius:7px;cursor:pointer;font-size:12px;
+  font-family:'DM Sans',sans-serif;transition:all .2s;}
+.seg-btn.active{border-color:var(--gold);color:var(--gold);background:var(--gold-soft);}
+
+/* selo de influência no card */
+.inf-tag{font-size:8.5px;text-transform:uppercase;letter-spacing:.04em;padding:1px 5px;
+  border-radius:4px;font-weight:600;margin-left:2px;white-space:nowrap;}
+.inf-tag.pos{color:var(--green);background:var(--green-soft);}
+.inf-tag.neg{color:var(--red);background:var(--red-soft);}
+
+/* mensagem de erro dentro de modal */
+.modal-err{color:var(--red);font-size:12px;margin-top:10px;line-height:1.4;}
+
 @media(max-width:860px){
   .menu-toggle{display:inline-flex;}
   .sidebar{position:fixed;top:60px;left:0;bottom:0;height:calc(100vh - 60px);z-index:160;
@@ -353,7 +376,7 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
         <button class="icon-btn" onclick="openRenameFixed('salario')" title="Renomear">✎</button>
       </div>
       <input class="edit-inline" id="field-salario" value="R$ 0,00"
-        onblur="fmtField(this);saveField('salario',this.value);recalc()" onfocus="selAll(this)">
+        oninput="numOnly(this)" onblur="saveCampo('salario',this)" onfocus="selAll(this)">
     </div>
     <div class="summary-card c-blue">
       <div class="card-label-wrap">
@@ -361,7 +384,7 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
         <button class="icon-btn" onclick="openRenameFixed('proventos')" title="Renomear">✎</button>
       </div>
       <input class="edit-inline" id="field-proventos" value="R$ 0,00" style="color:var(--blue)"
-        onblur="fmtField(this);saveField('proventos',this.value);recalc()" onfocus="selAll(this)">
+        oninput="numOnly(this)" onblur="saveCampo('proventos',this)" onfocus="selAll(this)">
     </div>
     <div class="summary-card c-gold">
       <div class="card-label-wrap"><span class="card-label">Sobra do Mês</span></div>
@@ -373,7 +396,7 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
         <button class="icon-btn" onclick="openRenameFixed('saldo')" title="Renomear">✎</button>
       </div>
       <input class="edit-inline" id="field-saldo" value="R$ 0,00" style="color:#3ab5b0"
-        onblur="fmtField(this,true);saveField('saldo',this.value);recalc()" onfocus="selAll(this)">
+        oninput="numOnly(this,true)" onblur="saveCampo('saldo',this,true)" onfocus="selAll(this)">
     </div>
     <div id="custom-cards"></div>
     <button class="add-card-btn" onclick="openAddCard()"><span>＋</span><small>Novo Card</small></button>
@@ -396,7 +419,7 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
       </div>
       <div class="add-form" id="form-fixas">
         <div class="fld"><label>Descrição</label><input id="nf-fixas" placeholder="ex: Aluguel"></div>
-        <div class="fld" style="max-width:130px"><label>Valor (R$)</label><input id="vf-fixas" placeholder="824,04"></div>
+        <div class="fld" style="max-width:130px"><label>Valor (R$)</label><input id="vf-fixas" placeholder="824,04" oninput="numOnly(this)"></div>
         <div class="fld"><label>Observação</label><input id="of-fixas" placeholder="opcional"></div>
         <div class="parc-wrap">
           <div class="parc-chk">
@@ -451,7 +474,7 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
       </div>
       <div class="add-form" id="form-cartao">
         <div class="fld"><label>Descrição</label><input id="nf-cartao" placeholder="ex: TV 65&quot;"></div>
-        <div class="fld" style="max-width:110px"><label>Valor</label><input id="vf-cartao" placeholder="350,00"></div>
+        <div class="fld" style="max-width:110px"><label>Valor</label><input id="vf-cartao" placeholder="350,00" oninput="numOnly(this)"></div>
         <div class="fld"><label>Obs.</label><input id="of-cartao" placeholder="opcional"></div>
         <div class="parc-wrap">
           <div class="parc-chk">
@@ -499,7 +522,7 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
       </div>
       <div class="add-form" id="form-ia">
         <div class="fld"><label>Descrição</label><input id="nf-ia" placeholder="ex: Claude Pro"></div>
-        <div class="fld" style="max-width:110px"><label>Valor</label><input id="vf-ia" placeholder="20,00"></div>
+        <div class="fld" style="max-width:110px"><label>Valor</label><input id="vf-ia" placeholder="20,00" oninput="numOnly(this)"></div>
         <div class="fld"><label>Obs.</label><input id="of-ia" placeholder="opcional"></div>
         <div class="parc-wrap">
           <div class="parc-chk">
@@ -547,7 +570,7 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
       </div>
       <div class="add-form" id="form-investimentos">
         <div class="fld"><label>Tipo de Investimento</label><input id="iv-tipo" placeholder="ex: Tesouro Direto"></div>
-        <div class="fld" style="max-width:130px"><label>Valor (R$)</label><input id="iv-val" placeholder="500,00"></div>
+        <div class="fld" style="max-width:130px"><label>Valor (R$)</label><input id="iv-val" placeholder="500,00" oninput="numOnly(this)"></div>
         <div class="fld" style="max-width:150px"><label>Data</label><input id="iv-data" type="date"></div>
         <button class="cbtn" onclick="addInvestimento()">OK</button>
       </div>
@@ -610,7 +633,18 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
   <div class="modal">
     <h3 id="modal-title">Novo Card</h3>
     <div class="mfield"><label>Nome</label><input id="m-name" placeholder="ex: Reserva"></div>
-    <div class="mfield" id="m-val-wrap"><label>Valor</label><input id="m-val" placeholder="R$ 0,00"></div>
+    <div class="mfield" id="m-val-wrap"><label>Valor</label><input id="m-val" placeholder="R$ 0,00" oninput="numOnly(this)"></div>
+    <div class="mfield" id="m-influence-wrap">
+      <label>Influência na Sobra do Mês</label>
+      <div class="parc-chk-inner">
+        <input type="checkbox" id="m-influi" onchange="toggleInfluence()">
+        <span>Este card entra no cálculo da Sobra</span>
+      </div>
+      <div class="seg" id="m-sinal-wrap" style="margin-top:8px;display:none">
+        <button type="button" class="seg-btn active" data-sinal="+" onclick="pickSinal(this)">+ Soma (receita)</button>
+        <button type="button" class="seg-btn" data-sinal="-" onclick="pickSinal(this)">− Subtrai (despesa)</button>
+      </div>
+    </div>
     <div class="mfield" id="m-color-wrap">
       <label>Cor</label>
       <div class="color-row">
@@ -645,6 +679,7 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
       <div class="mfield"><label>Parcela atual</label><input id="pm-atual" type="number" min="1" placeholder="1"></div>
       <div class="mfield"><label>De (total)</label><input id="pm-total" type="number" min="1" placeholder="12"></div>
     </div>
+    <p class="modal-err" id="pm-msg" style="display:none"></p>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeParcModal()">Cancelar</button>
       <button class="btn-ok" onclick="saveParcModal()">Salvar</button>
@@ -757,11 +792,35 @@ function esc(s) {
   return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
 }
 function selAll(el) { setTimeout(()=>el.select(),0); }
-// Reformata o valor de um input para o padrão monetário "R$ X.XXX,XX".
-// signed=true permite valores negativos (ex.: Saldo em conta).
-function fmtField(el, signed) {
-  if (!el) return;
-  el.value = signed ? fmtS(parseSigned(el.value)) : fmt(parse(el.value));
+// ─── LIMITE DE VALOR + AVISO (TOAST) ─────────────────────────────
+const MAX_VAL = 999999.99; // teto: R$ 999.999,99 (8 dígitos)
+function overMax(n) { return Math.abs(n) > MAX_VAL + 0.001; }
+let _toastT = null;
+function toast(msg) {
+  let el = document.getElementById('toast');
+  if (!el) { el = document.createElement('div'); el.id = 'toast'; document.body.appendChild(el); }
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(_toastT);
+  _toastT = setTimeout(() => el.classList.remove('show'), 2800);
+}
+const MSG_MAX = 'Valor máximo permitido: R$ 999.999,99';
+// Filtra a digitação: mantém apenas números e vírgula (e '-' inicial se signed).
+function numOnly(el, signed) {
+  let v = el.value.replace(/[^0-9,\-]/g, '');
+  if (signed) { const neg = v.trim().startsWith('-'); v = v.replace(/-/g, ''); if (neg) v = '-' + v; }
+  else { v = v.replace(/-/g, ''); }
+  const parts = v.split(',');
+  if (parts.length > 2) v = parts[0] + ',' + parts.slice(1).join('');
+  el.value = v;
+}
+// Salva um card de topo (salário/proventos/saldo) com formatação e limite.
+function saveCampo(k, el, signed) {
+  const n = signed ? parseSigned(el.value) : parse(el.value);
+  if (overMax(n)) { toast(MSG_MAX); el.value = state.campos[k] || (signed ? fmtS(0) : fmt(0)); return; }
+  el.value = signed ? fmtS(n) : fmt(n);
+  saveField(k, el.value);
+  recalc();
 }
 function colorVal(c) {
   return {'c-green':'var(--green)','c-blue':'var(--blue)','c-gold':'var(--gold)',
@@ -786,18 +845,22 @@ function renderSec(s) {
     const parcEl = (p && p.ativo)
       ? `<span class="parc-badge">${p.atual}/${p.total}</span>`
       : `<span style="color:var(--muted);font-size:12px">—</span>`;
-    const isPaid = !!item.paid;
+    // botão Pago só existe em Gastos Fixos
+    const isPaid = (s==='fixas') && !!item.paid;
     const payTitle = isPaid ? 'Marcar como NÃO paga' : 'Marcar como paga';
+    const payBtn = (s==='fixas')
+      ? `<button class="pay-btn${isPaid?' on':''}" onclick="togglePaid('${s}',${i})" title="${payTitle}">✓</button>`
+      : '';
     const tr = document.createElement('tr');
     if (isPaid) tr.className = 'paid';
     tr.innerHTML = `
       <td class="en"><input value="${esc(item.name)}" onblur="upd('${s}',${i},'name',this.value)"></td>
-      <td class="ev" style="text-align:right"><input value="${fmt(item.value)}" style="text-align:right" onblur="updVal('${s}',${i},this)"></td>
+      <td class="ev" style="text-align:right"><input value="${fmt(item.value)}" style="text-align:right" oninput="numOnly(this)" onfocus="selAll(this)" onblur="updVal('${s}',${i},this)"></td>
       <td style="text-align:center;width:72px">${parcEl}</td>
       <td class="eo"><input value="${esc(item.obs||'')}" placeholder="obs..." onblur="upd('${s}',${i},'obs',this.value)"></td>
       <td class="act-cell">
         <button class="parc-btn" onclick="openParcModal('${s}',${i})" title="Editar parcela">✎</button>
-        <button class="pay-btn${isPaid?' on':''}" onclick="togglePaid('${s}',${i})" title="${payTitle}">✓</button>
+        ${payBtn}
         <button class="del-btn" onclick="delItem('${s}',${i})" title="Remover">×</button>
       </td>`;
     tbody.appendChild(tr);
@@ -819,7 +882,7 @@ function renderInvestimentos() {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="et"><input value="${esc(item.tipo||'')}" placeholder="tipo..." onblur="updInvest(${i},'tipo',this.value)"></td>
-      <td class="ev ok" style="text-align:right"><input value="${fmt(item.valor||0)}" style="text-align:right" onblur="updInvest(${i},'valor',this.value)"></td>
+      <td class="ev ok" style="text-align:right"><input value="${fmt(item.valor||0)}" style="text-align:right" oninput="numOnly(this)" onfocus="selAll(this)" onblur="updInvest(${i},'valor',this.value)"></td>
       <td style="color:var(--muted);font-size:12px;white-space:nowrap">${dateStr}</td>
       <td class="act-cell" style="width:48px"><button class="del-btn" onclick="delInvest(${i})" title="Remover">×</button></td>`;
     tbody.appendChild(tr);
@@ -841,19 +904,27 @@ function renderCC() {
   loadCC().forEach((c,i) => {
     const d = document.createElement('div');
     d.className = `summary-card ${c.color}`;
+    const infTag = c.influi
+      ? `<span class="inf-tag ${c.sinal==='-'?'neg':'pos'}">${c.sinal==='-'?'↓':'↑'} Sobra</span>`
+      : '';
     d.innerHTML = `
       <div class="card-label-wrap">
-        <span class="card-label">${esc(c.name)}</span>
+        <span class="card-label">${esc(c.name)}</span>${infTag}
         <button class="icon-btn" onclick="openEditCC(${i})" title="Editar">✎</button>
         <button class="icon-btn del" onclick="delCC(${i})" title="Remover">×</button>
       </div>
       <input class="edit-inline" value="${esc(c.value)}" style="color:${colorVal(c.color)}"
-        onblur="updCC(${i},this)" onfocus="selAll(this)">`;
+        oninput="numOnly(this)" onblur="updCC(${i},this)" onfocus="selAll(this)">`;
     area.appendChild(d);
   });
 }
-function updCC(i,el) { const v=fmt(parse(el.value)); el.value=v; const d=loadCC(); d[i].value=v; saveCC(d); }
-function delCC(i)   { if(!confirm('Remover card?')) return; const d=loadCC(); d.splice(i,1); saveCC(d); renderCC(); }
+function updCC(i,el) {
+  const n = parse(el.value);
+  const d = loadCC();
+  if (overMax(n)) { toast(MSG_MAX); el.value = d[i].value; return; }
+  const v = fmt(n); el.value = v; d[i].value = v; saveCC(d); recalc();
+}
+function delCC(i)   { if(!confirm('Remover card?')) return; const d=loadCC(); d.splice(i,1); saveCC(d); renderCC(); recalc(); }
 
 // ─── RECALC ──────────────────────────────────────────────────────
 function recalc() {
@@ -864,7 +935,9 @@ function recalc() {
   const sal   = parse(document.getElementById('field-salario').value);
   const prov  = parse(document.getElementById('field-proventos').value);
   const saldo = parseSigned(document.getElementById('field-saldo').value);
-  const sobra = sal + prov + saldo - grand;
+  // cards personalizados que influenciam a Sobra (+ soma / − subtrai)
+  const cardsAdj = loadCC().reduce((a,c)=> a + (c.influi ? (c.sinal==='-'?-1:1)*parse(c.value) : 0), 0);
+  const sobra = sal + prov + saldo - grand + cardsAdj;
 
   document.getElementById('sum-total').textContent  = fmt(grand);
   document.getElementById('sum-pago').textContent   = fmt(pago);
@@ -887,7 +960,9 @@ function upd(s,i,f,v) {
 // Edição de valor nas tabelas: salva o número e reformata o input para "R$ X.XXX,XX".
 function updVal(s,i,el) {
   const n = parse(el.value);
-  const d = loadSec(s); d[i].value = n; saveSec(s,d);
+  const d = loadSec(s);
+  if (overMax(n)) { toast(MSG_MAX); el.value = fmt(d[i].value); return; }
+  d[i].value = n; saveSec(s,d);
   el.value = fmt(n);
   document.getElementById('tot-'+s).textContent = fmt(d.reduce((a,x)=>a+x.value,0));
   recalc();
@@ -909,6 +984,7 @@ function addItem(s) {
   const pAtual = parseInt(document.getElementById('pa-'+s)?.value)||1;
   const pTotal = parseInt(document.getElementById('pt-'+s)?.value)||1;
   if (!name) return;
+  if (overMax(val)) { toast(MSG_MAX); return; }
   const d = loadSec(s);
   d.push({ id:Date.now(), name, value:val, obs,
     parcela:{ ativo:isP, atual:pAtual, total:Math.max(pAtual,pTotal) } });
@@ -921,7 +997,11 @@ function addItem(s) {
 
 function updInvest(i,f,v) {
   const d = loadSec('investimentos');
-  if (f==='valor') d[i].valor = parse(v); else d[i][f] = v;
+  if (f==='valor') {
+    const n = parse(v);
+    if (overMax(n)) { toast(MSG_MAX); renderInvestimentos(); return; }
+    d[i].valor = n;
+  } else d[i][f] = v;
   saveSec('investimentos',d);
   renderInvestimentos();
 }
@@ -933,6 +1013,7 @@ function addInvestimento() {
   const val  = parse(document.getElementById('iv-val').value);
   const data = document.getElementById('iv-data').value;
   if (!tipo && !val) return;
+  if (overMax(val)) { toast(MSG_MAX); return; }
   const d = loadSec('investimentos');
   d.push({ id:Date.now(), tipo, valor:val, data });
   saveSec('investimentos',d);
@@ -999,8 +1080,20 @@ function selColor(c) {
   document.querySelectorAll('.color-opt').forEach(o=>o.classList.toggle('sel', o.dataset.c===c));
 }
 function showFields(val, color) {
-  document.getElementById('m-val-wrap').style.display   = val   ? '' : 'none';
-  document.getElementById('m-color-wrap').style.display = color ? '' : 'none';
+  document.getElementById('m-val-wrap').style.display        = val   ? '' : 'none';
+  document.getElementById('m-color-wrap').style.display      = color ? '' : 'none';
+  document.getElementById('m-influence-wrap').style.display  = color ? '' : 'none';
+}
+function toggleInfluence() {
+  const on = document.getElementById('m-influi').checked;
+  document.getElementById('m-sinal-wrap').style.display = on ? '' : 'none';
+}
+function pickSinal(el) {
+  document.querySelectorAll('#m-sinal-wrap .seg-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+}
+function selSinal(s) {
+  document.querySelectorAll('#m-sinal-wrap .seg-btn').forEach(b=>b.classList.toggle('active', b.dataset.sinal===(s||'+')));
 }
 function openModal() {
   document.getElementById('modal-bg').classList.add('open');
@@ -1013,7 +1106,10 @@ function openAddCard() {
   document.getElementById('modal-title').textContent = 'Novo Card';
   document.getElementById('m-name').value = '';
   document.getElementById('m-val').value  = '';
-  selColor('c-green'); showFields(true,true); openModal();
+  selColor('c-green');
+  document.getElementById('m-influi').checked = false;
+  selSinal('+');
+  showFields(true,true); toggleInfluence(); openModal();
 }
 function openEditCC(i) {
   mMode='edit-cc'; mIdx=i;
@@ -1021,7 +1117,10 @@ function openEditCC(i) {
   document.getElementById('modal-title').textContent = 'Editar Card';
   document.getElementById('m-name').value = c.name;
   document.getElementById('m-val').value  = c.value;
-  selColor(c.color); showFields(true,true); openModal();
+  selColor(c.color);
+  document.getElementById('m-influi').checked = !!c.influi;
+  selSinal(c.sinal || '+');
+  showFields(true,true); toggleInfluence(); openModal();
 }
 function openRenameFixed(k) {
   mMode='rename-fixed'; mKey=k;
@@ -1040,12 +1139,16 @@ function openRenameSection(s) {
   showFields(false,false); openModal();
 }
 function doModal() {
-  const name  = document.getElementById('m-name').value.trim();
-  const val   = fmt(parse(document.getElementById('m-val').value));
-  const color = document.querySelector('.color-opt.sel')?.dataset.c||'c-green';
+  const name   = document.getElementById('m-name').value.trim();
+  const nVal   = parse(document.getElementById('m-val').value);
+  const color  = document.querySelector('.color-opt.sel')?.dataset.c||'c-green';
+  const influi = document.getElementById('m-influi').checked;
+  const sinal  = document.querySelector('#m-sinal-wrap .seg-btn.active')?.dataset.sinal || '+';
   if (!name) return;
-  if      (mMode==='add')          { const d=loadCC(); d.push({name,value:val,color}); saveCC(d); renderCC(); }
-  else if (mMode==='edit-cc')      { const d=loadCC(); d[mIdx]={name,value:val,color}; saveCC(d); renderCC(); }
+  if ((mMode==='add' || mMode==='edit-cc') && overMax(nVal)) { toast(MSG_MAX); return; }
+  const val = fmt(nVal);
+  if      (mMode==='add')          { const d=loadCC(); d.push({name,value:val,color,influi,sinal}); saveCC(d); renderCC(); recalc(); }
+  else if (mMode==='edit-cc')      { const d=loadCC(); d[mIdx]={name,value:val,color,influi,sinal}; saveCC(d); renderCC(); recalc(); }
   else if (mMode==='rename-fixed') { cfgSet('lbl_'+mKey,name); document.getElementById('lbl-'+mKey).textContent=name; }
   else if (mMode==='rename-sec')   { cfgSet('sn_'+mKey,name); document.getElementById('sn-'+mKey).textContent=name; }
   closeModal();
@@ -1061,6 +1164,7 @@ function openParcModal(s, i) {
   document.getElementById('pm-check').checked = !!p.ativo;
   document.getElementById('pm-atual').value = p.atual || 1;
   document.getElementById('pm-total').value = p.total || 1;
+  document.getElementById('pm-msg').style.display = 'none';
   pmToggle();
   document.getElementById('parc-modal-bg').classList.add('open');
 }
@@ -1074,8 +1178,15 @@ function saveParcModal() {
   const on    = document.getElementById('pm-check').checked;
   const atual = parseInt(document.getElementById('pm-atual').value)||1;
   const total = parseInt(document.getElementById('pm-total').value)||1;
+  const msg   = document.getElementById('pm-msg');
+  if (on && atual > total) {
+    msg.textContent = 'Não é possível: a parcela atual é maior que o número de parcelas.';
+    msg.style.display = 'block';
+    return;
+  }
+  msg.style.display = 'none';
   const d = loadSec(pmSec);
-  d[pmIdx].parcela = { ativo:on, atual, total:Math.max(atual,total) };
+  d[pmIdx].parcela = { ativo:on, atual, total };
   saveSec(pmSec, d);
   closeParcModal();
   renderSec(pmSec);
@@ -1084,9 +1195,7 @@ function saveParcModal() {
 document.getElementById('modal-bg').addEventListener('click', e => {
   if (e.target===e.currentTarget) closeModal();
 });
-document.getElementById('parc-modal-bg').addEventListener('click', e => {
-  if (e.target===e.currentTarget) closeParcModal();
-});
+// O modal de parcela NÃO fecha ao clicar fora — só via Salvar/Cancelar.
 document.addEventListener('keydown', e => {
   if (e.key==='Enter') {
     if (document.getElementById('parc-modal-bg').classList.contains('open')) saveParcModal();
