@@ -17,7 +17,7 @@
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;}
-body.loading .main-grid,body.loading #summary-grid{opacity:.5;pointer-events:none;transition:opacity .15s;}
+body.loading .tab-panel,body.loading #summary-grid{opacity:.5;pointer-events:none;transition:opacity .15s;}
 
 /* HEADER */
 header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;
@@ -146,7 +146,7 @@ tr:hover .del-btn{opacity:1;}
   border-radius:10px;padding:1px 8px;font-size:11px;font-weight:600;white-space:nowrap;}
 
 /* PAGO */
-.act-cell{white-space:nowrap;text-align:right;width:88px;}
+.act-cell{white-space:nowrap;text-align:right;width:112px;}
 .act-cell button{vertical-align:middle;}
 .pay-btn{background:none;border:1px solid var(--border);cursor:pointer;color:var(--muted);
   font-size:12px;width:22px;height:22px;border-radius:50%;display:inline-flex;
@@ -155,6 +155,11 @@ tr:hover .del-btn{opacity:1;}
 .pay-btn:hover{border-color:var(--green);color:var(--green);}
 .pay-btn.on{background:var(--green);border-color:var(--green);color:#0d0f14;font-weight:700;}
 .pay-btn.on:hover{opacity:.85;color:#0d0f14;}
+.parc-btn{background:none;border:1px solid var(--border);cursor:pointer;color:var(--muted);
+  font-size:11px;width:22px;height:22px;border-radius:50%;display:inline-flex;
+  align-items:center;justify-content:center;padding:0;line-height:1;
+  transition:all .2s;margin-right:4px;}
+.parc-btn:hover{border-color:var(--gold);color:var(--gold);}
 tr.paid td{background:rgba(76,175,125,.07);}
 tr.paid td:first-child{box-shadow:inset 3px 0 0 var(--green);}
 tr.paid .en input,tr.paid .eo input{text-decoration:line-through;text-decoration-thickness:1.5px;opacity:.6;}
@@ -201,6 +206,57 @@ tr.paid .parc-badge{opacity:.55;}
 
 footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
 
+/* ═══ LAYOUT COM MENU LATERAL ═══ */
+.app-body{display:flex;align-items:flex-start;}
+.menu-toggle{display:none;background:none;border:1px solid var(--border);color:var(--muted);
+  width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:16px;line-height:1;
+  align-items:center;justify-content:center;transition:all .2s;flex:0 0 auto;}
+.menu-toggle:hover{border-color:var(--gold);color:var(--gold);}
+.sidebar{width:236px;flex:0 0 236px;background:var(--surface);border-right:1px solid var(--border);
+  min-height:calc(100vh - 60px);position:sticky;top:60px;padding:16px 12px;align-self:stretch;}
+.sidebar-title{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);
+  padding:4px 10px 10px;font-weight:500;}
+.nav-item{display:flex;align-items:flex-start;gap:9px;padding:11px 12px;border-radius:9px;
+  cursor:pointer;color:var(--muted);font-size:13.5px;font-weight:500;margin-bottom:3px;
+  transition:all .15s;border:1px solid transparent;line-height:1.35;}
+.nav-item:hover{background:var(--surface2);color:var(--text);}
+.nav-item.active{background:var(--gold-soft);color:var(--gold);border-color:rgba(201,168,76,.35);}
+.nav-ico{font-size:15px;width:20px;text-align:center;flex:0 0 20px;line-height:1.35;}
+.nav-tag{display:inline-block;font-size:8.5px;text-transform:uppercase;letter-spacing:.04em;
+  color:var(--purple);background:rgba(139,111,201,.14);padding:1px 5px;border-radius:4px;
+  font-weight:600;white-space:nowrap;vertical-align:middle;}
+.content{flex:1;min-width:0;padding:22px 18px;max-width:1140px;margin:0 auto;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+.sidebar-overlay{display:none;position:fixed;inset:60px 0 0 0;background:rgba(0,0,0,.5);z-index:150;}
+
+/* upload de faturas */
+.fat-upload{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;
+  padding:14px 16px;border-bottom:1px solid var(--border);background:rgba(139,111,201,.05);}
+.fat-upload .fld{display:flex;flex-direction:column;gap:4px;}
+.fat-upload label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
+.fat-upload input[type=text],.fat-upload #fat-cartao{background:var(--surface2);border:1px solid var(--border);
+  color:var(--text);padding:7px 10px;border-radius:7px;font-family:'DM Sans',sans-serif;
+  font-size:13px;outline:none;transition:border-color .2s;width:100%;}
+.fat-upload #fat-cartao:focus{border-color:var(--gold);}
+.fat-upload input[type=file]{background:var(--surface2);border:1px solid var(--border);
+  color:var(--muted);padding:6px 10px;border-radius:7px;font-family:'DM Sans',sans-serif;
+  font-size:12.5px;width:100%;cursor:pointer;}
+.fat-upload .cbtn{background:var(--gold);color:var(--bg);border:none;padding:8px 16px;
+  border-radius:7px;cursor:pointer;font-weight:600;font-size:13px;white-space:nowrap;}
+.fat-upload .cbtn:disabled{opacity:.5;cursor:default;}
+#fat-status{padding:0 16px;}
+#fat-status p{padding:8px 0;font-size:13px;margin:0;}
+
+@media(max-width:860px){
+  .menu-toggle{display:inline-flex;}
+  .sidebar{position:fixed;top:60px;left:0;bottom:0;height:calc(100vh - 60px);z-index:160;
+    transform:translateX(-100%);transition:transform .22s ease;overflow-y:auto;min-height:auto;}
+  .sidebar.open{transform:translateX(0);box-shadow:4px 0 20px rgba(0,0,0,.4);}
+  .sidebar-overlay.open{display:block;}
+  .content{padding:16px 14px;}
+}
+
 @media(max-width:760px){
   .summary-card,.add-card-btn{min-width:calc(50% - 7px);flex-basis:calc(50% - 7px);}
   header{height:auto;padding:10px 14px;flex-wrap:wrap;}
@@ -240,7 +296,10 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
 
 <!-- ═══ HEADER ═══ -->
 <header>
-  <h1>💰 Controle Financeiro</h1>
+  <div style="display:flex;align-items:center;gap:12px">
+    <button class="menu-toggle" onclick="toggleSidebar()" title="Menu" aria-label="Abrir menu">☰</button>
+    <h1>💰 Controle Financeiro</h1>
+  </div>
   <div class="header-right">
     <button class="rep-btn" onclick="replicarMes()">↷ Replicar para o mês seguinte</button>
     <div class="month-selector">
@@ -251,7 +310,28 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
   </div>
 </header>
 
-<div class="container">
+<!-- overlay do menu no mobile -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<div class="app-body">
+
+  <!-- ═══ MENU LATERAL ═══ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-title">Menu</div>
+    <div class="nav-item active" data-tab="fixas" onclick="switchTab('fixas')">
+      <span class="nav-ico">📌</span> Gastos Fixos</div>
+    <div class="nav-item" data-tab="cartao" onclick="switchTab('cartao')">
+      <span class="nav-ico">💳</span> Contas parceladas e fixas no cartão <span class="nav-tag">consultivo</span></div>
+    <div class="nav-item" data-tab="ia" onclick="switchTab('ia')">
+      <span class="nav-ico">🤖</span> Gastos com IA <span class="nav-tag">consultivo</span></div>
+    <div class="nav-item" data-tab="investimentos" onclick="switchTab('investimentos')">
+      <span class="nav-ico">📈</span> Investimentos <span class="nav-tag">consultivo</span></div>
+    <div class="nav-item" data-tab="faturas" onclick="switchTab('faturas')">
+      <span class="nav-ico">🧾</span> Faturas de Cartão de Crédito</div>
+  </aside>
+
+  <!-- ═══ CONTEÚDO ═══ -->
+  <main class="content">
 
   <!-- ═══ SUMMARY CARDS ═══ -->
   <div class="summary-grid" id="summary-grid">
@@ -260,12 +340,20 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
       <div class="card-value" id="sum-total">R$ 0,00</div>
     </div>
     <div class="summary-card c-green">
+      <div class="card-label-wrap"><span class="card-label">Gastos Fixos · Já Pago</span></div>
+      <div class="card-value" id="sum-pago">R$ 0,00</div>
+    </div>
+    <div class="summary-card c-gold">
+      <div class="card-label-wrap"><span class="card-label">Gastos Fixos · A Pagar</span></div>
+      <div class="card-value" id="sum-apagar">R$ 0,00</div>
+    </div>
+    <div class="summary-card c-green">
       <div class="card-label-wrap">
         <span class="card-label" id="lbl-salario">Salário</span>
         <button class="icon-btn" onclick="openRenameFixed('salario')" title="Renomear">✎</button>
       </div>
       <input class="edit-inline" id="field-salario" value="R$ 0,00"
-        onblur="saveField('salario',this.value);recalc()" onfocus="selAll(this)">
+        onblur="fmtField(this);saveField('salario',this.value);recalc()" onfocus="selAll(this)">
     </div>
     <div class="summary-card c-blue">
       <div class="card-label-wrap">
@@ -273,7 +361,7 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
         <button class="icon-btn" onclick="openRenameFixed('proventos')" title="Renomear">✎</button>
       </div>
       <input class="edit-inline" id="field-proventos" value="R$ 0,00" style="color:var(--blue)"
-        onblur="saveField('proventos',this.value);recalc()" onfocus="selAll(this)">
+        onblur="fmtField(this);saveField('proventos',this.value);recalc()" onfocus="selAll(this)">
     </div>
     <div class="summary-card c-gold">
       <div class="card-label-wrap"><span class="card-label">Sobra do Mês</span></div>
@@ -285,14 +373,14 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
         <button class="icon-btn" onclick="openRenameFixed('saldo')" title="Renomear">✎</button>
       </div>
       <input class="edit-inline" id="field-saldo" value="R$ 0,00" style="color:#3ab5b0"
-        onblur="saveField('saldo',this.value);recalc()" onfocus="selAll(this)">
+        onblur="fmtField(this,true);saveField('saldo',this.value);recalc()" onfocus="selAll(this)">
     </div>
     <div id="custom-cards"></div>
     <button class="add-card-btn" onclick="openAddCard()"><span>＋</span><small>Novo Card</small></button>
   </div>
 
-  <!-- ═══ MAIN GRID ═══ -->
-  <div class="main-grid">
+  <!-- ═══ PAINÉIS DAS ABAS ═══ -->
+  <div class="tab-panel active" id="panel-fixas">
 
     <!-- GASTOS FIXOS -->
     <div class="section">
@@ -331,18 +419,29 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
           <th style="text-align:right">Valor</th>
           <th style="text-align:center;width:72px">Parcela</th>
           <th>Observação</th>
-          <th style="width:88px;text-align:right">Ações</th>
+          <th style="width:112px;text-align:right">Ações</th>
         </tr></thead>
         <tbody id="tbody-fixas"></tbody>
       </table>
     </div>
+
+    <!-- ═══ GRÁFICO (aba Gastos Fixos) ═══ -->
+    <div class="chart-section">
+      <h2>Comparativo Mensal</h2>
+      <p class="chart-sub" id="chart-sub-label">—</p>
+      <canvas id="chart-canvas" height="280"></canvas>
+    </div>
+
+  </div><!-- /panel-fixas -->
+
+  <div class="tab-panel" id="panel-cartao">
 
     <!-- CONTAS PARCELADAS NO CARTÃO -->
     <div class="section">
       <div class="section-header">
         <h2>
           <span class="badge go"></span>
-          <span class="sec-name" id="sn-cartao" onclick="openRenameSection('cartao')">Contas parceladas no cartão</span>
+          <span class="sec-name" id="sn-cartao" onclick="openRenameSection('cartao')">Contas parceladas e fixas no cartão</span>
           <span class="info-tag">consultivo</span>
         </h2>
         <div style="display:flex;gap:8px;align-items:center">
@@ -375,11 +474,15 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
           <th style="text-align:right">Valor</th>
           <th style="text-align:center;width:72px">Parcela</th>
           <th>Observação</th>
-          <th style="width:88px;text-align:right">Ações</th>
+          <th style="width:112px;text-align:right">Ações</th>
         </tr></thead>
         <tbody id="tbody-cartao"></tbody>
       </table>
     </div>
+
+  </div><!-- /panel-cartao -->
+
+  <div class="tab-panel" id="panel-ia">
 
     <!-- GASTOS COM IA -->
     <div class="section">
@@ -419,11 +522,15 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
           <th style="text-align:right">Valor</th>
           <th style="text-align:center;width:72px">Parcela</th>
           <th>Observação</th>
-          <th style="width:88px;text-align:right">Ações</th>
+          <th style="width:112px;text-align:right">Ações</th>
         </tr></thead>
         <tbody id="tbody-ia"></tbody>
       </table>
     </div>
+
+  </div><!-- /panel-ia -->
+
+  <div class="tab-panel" id="panel-investimentos">
 
     <!-- VALOR INVESTIDO -->
     <div class="section">
@@ -455,16 +562,46 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
       </table>
     </div>
 
-  </div><!-- /main-grid -->
+  </div><!-- /panel-investimentos -->
 
-  <!-- ═══ GRÁFICO ═══ -->
-  <div class="chart-section">
-    <h2>Comparativo Mensal</h2>
-    <p class="chart-sub" id="chart-sub-label">—</p>
-    <canvas id="chart-canvas" height="280"></canvas>
-  </div>
+  <div class="tab-panel" id="panel-faturas">
 
-</div><!-- /container -->
+    <!-- FATURAS DE CARTÃO DE CRÉDITO -->
+    <div class="section">
+      <div class="section-header">
+        <h2>
+          <span class="badge" style="background:var(--purple)"></span>
+          <span style="font-family:'DM Serif Display',serif">Faturas de Cartão de Crédito</span>
+          <span class="info-tag">upload</span>
+        </h2>
+      </div>
+      <div class="fat-upload">
+        <div class="fld" style="flex:1;min-width:140px">
+          <label>Cartão</label>
+          <input id="fat-cartao" placeholder="ex: Nubank">
+        </div>
+        <div class="fld" style="flex:2;min-width:220px">
+          <label>Arquivo (PDF ou imagem)</label>
+          <input id="fat-file" type="file" accept=".pdf,image/*">
+        </div>
+        <button class="cbtn" id="fat-upload-btn" onclick="uploadFatura()">Enviar fatura</button>
+      </div>
+      <div id="fat-status"></div>
+      <table>
+        <thead><tr>
+          <th>Cartão</th>
+          <th>Arquivo</th>
+          <th>Enviado em</th>
+          <th style="width:96px;text-align:right">Ações</th>
+        </tr></thead>
+        <tbody id="tbody-faturas"></tbody>
+      </table>
+    </div>
+
+  </div><!-- /panel-faturas -->
+
+  </main><!-- /content -->
+</div><!-- /app-body -->
 
 <footer>Dados sincronizados com Supabase · Controle Financeiro Pessoal © 2026</footer>
 
@@ -488,6 +625,29 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
       <button class="btn-ok" onclick="doModal()">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL EDITAR PARCELA ═══ -->
+<div class="modal-bg" id="parc-modal-bg">
+  <div class="modal">
+    <h3>Editar Parcela</h3>
+    <p class="modal-desc" id="pm-desc">—</p>
+    <div class="mfield">
+      <label>Parcelado?</label>
+      <div class="parc-chk-inner">
+        <input type="checkbox" id="pm-check" onchange="pmToggle()">
+        <span>Sim</span>
+      </div>
+    </div>
+    <div class="mrow" id="pm-fields">
+      <div class="mfield"><label>Parcela atual</label><input id="pm-atual" type="number" min="1" placeholder="1"></div>
+      <div class="mfield"><label>De (total)</label><input id="pm-total" type="number" min="1" placeholder="12"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeParcModal()">Cancelar</button>
+      <button class="btn-ok" onclick="saveParcModal()">Salvar</button>
     </div>
   </div>
 </div>
@@ -597,6 +757,12 @@ function esc(s) {
   return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
 }
 function selAll(el) { setTimeout(()=>el.select(),0); }
+// Reformata o valor de um input para o padrão monetário "R$ X.XXX,XX".
+// signed=true permite valores negativos (ex.: Saldo em conta).
+function fmtField(el, signed) {
+  if (!el) return;
+  el.value = signed ? fmtS(parseSigned(el.value)) : fmt(parse(el.value));
+}
 function colorVal(c) {
   return {'c-green':'var(--green)','c-blue':'var(--blue)','c-gold':'var(--gold)',
           'c-red':'var(--red)','c-purple':'#8b6fc9','c-teal':'#3ab5b0'}[c]||'var(--text)';
@@ -626,10 +792,11 @@ function renderSec(s) {
     if (isPaid) tr.className = 'paid';
     tr.innerHTML = `
       <td class="en"><input value="${esc(item.name)}" onblur="upd('${s}',${i},'name',this.value)"></td>
-      <td class="ev" style="text-align:right"><input value="${item.value.toFixed(2).replace('.',',')}" style="text-align:right" onblur="upd('${s}',${i},'value',this.value)"></td>
+      <td class="ev" style="text-align:right"><input value="${fmt(item.value)}" style="text-align:right" onblur="updVal('${s}',${i},this)"></td>
       <td style="text-align:center;width:72px">${parcEl}</td>
       <td class="eo"><input value="${esc(item.obs||'')}" placeholder="obs..." onblur="upd('${s}',${i},'obs',this.value)"></td>
       <td class="act-cell">
+        <button class="parc-btn" onclick="openParcModal('${s}',${i})" title="Editar parcela">✎</button>
         <button class="pay-btn${isPaid?' on':''}" onclick="togglePaid('${s}',${i})" title="${payTitle}">✓</button>
         <button class="del-btn" onclick="delItem('${s}',${i})" title="Remover">×</button>
       </td>`;
@@ -652,7 +819,7 @@ function renderInvestimentos() {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="et"><input value="${esc(item.tipo||'')}" placeholder="tipo..." onblur="updInvest(${i},'tipo',this.value)"></td>
-      <td class="ev ok" style="text-align:right"><input value="${(item.valor||0).toFixed(2).replace('.',',')}" style="text-align:right" onblur="updInvest(${i},'valor',this.value)"></td>
+      <td class="ev ok" style="text-align:right"><input value="${fmt(item.valor||0)}" style="text-align:right" onblur="updInvest(${i},'valor',this.value)"></td>
       <td style="color:var(--muted);font-size:12px;white-space:nowrap">${dateStr}</td>
       <td class="act-cell" style="width:48px"><button class="del-btn" onclick="delInvest(${i})" title="Remover">×</button></td>`;
     tbody.appendChild(tr);
@@ -681,22 +848,27 @@ function renderCC() {
         <button class="icon-btn del" onclick="delCC(${i})" title="Remover">×</button>
       </div>
       <input class="edit-inline" value="${esc(c.value)}" style="color:${colorVal(c.color)}"
-        onblur="updCC(${i},this.value)" onfocus="selAll(this)">`;
+        onblur="updCC(${i},this)" onfocus="selAll(this)">`;
     area.appendChild(d);
   });
 }
-function updCC(i,v) { const d=loadCC(); d[i].value=v; saveCC(d); }
+function updCC(i,el) { const v=fmt(parse(el.value)); el.value=v; const d=loadCC(); d[i].value=v; saveCC(d); }
 function delCC(i)   { if(!confirm('Remover card?')) return; const d=loadCC(); d.splice(i,1); saveCC(d); renderCC(); }
 
 // ─── RECALC ──────────────────────────────────────────────────────
 function recalc() {
-  const grand = loadSec('fixas').reduce((a,i)=>a+i.value, 0);
+  const fixas = loadSec('fixas');
+  const grand = fixas.reduce((a,i)=>a+i.value, 0);
+  const pago  = fixas.reduce((a,i)=>a + (i.paid ? i.value : 0), 0);
+  const aPagar = grand - pago;
   const sal   = parse(document.getElementById('field-salario').value);
   const prov  = parse(document.getElementById('field-proventos').value);
   const saldo = parseSigned(document.getElementById('field-saldo').value);
   const sobra = sal + prov + saldo - grand;
 
-  document.getElementById('sum-total').textContent = fmt(grand);
+  document.getElementById('sum-total').textContent  = fmt(grand);
+  document.getElementById('sum-pago').textContent   = fmt(pago);
+  document.getElementById('sum-apagar').textContent = fmt(aPagar);
   const el = document.getElementById('sum-sobra');
   el.textContent = fmtS(sobra);
   el.style.color = sobra >= 0 ? 'var(--green)' : 'var(--red)';
@@ -709,6 +881,14 @@ function upd(s,i,f,v) {
   const d = loadSec(s);
   if (f==='value') d[i].value = parse(v); else d[i][f] = v;
   saveSec(s,d);
+  document.getElementById('tot-'+s).textContent = fmt(d.reduce((a,x)=>a+x.value,0));
+  recalc();
+}
+// Edição de valor nas tabelas: salva o número e reformata o input para "R$ X.XXX,XX".
+function updVal(s,i,el) {
+  const n = parse(el.value);
+  const d = loadSec(s); d[i].value = n; saveSec(s,d);
+  el.value = fmt(n);
   document.getElementById('tot-'+s).textContent = fmt(d.reduce((a,x)=>a+x.value,0));
   recalc();
 }
@@ -855,13 +1035,13 @@ function openRenameSection(s) {
   mMode='rename-sec'; mKey=s;
   document.getElementById('modal-title').textContent = 'Renomear Seção';
   document.getElementById('m-name').value = cfgGet('sn_'+s, {
-    fixas:'Gastos Fixos', cartao:'Contas parceladas no cartão', ia:'Gastos com IA'
+    fixas:'Gastos Fixos', cartao:'Contas parceladas e fixas no cartão', ia:'Gastos com IA'
   }[s]);
   showFields(false,false); openModal();
 }
 function doModal() {
   const name  = document.getElementById('m-name').value.trim();
-  const val   = document.getElementById('m-val').value.trim()||'R$ 0,00';
+  const val   = fmt(parse(document.getElementById('m-val').value));
   const color = document.querySelector('.color-opt.sel')?.dataset.c||'c-green';
   if (!name) return;
   if      (mMode==='add')          { const d=loadCC(); d.push({name,value:val,color}); saveCC(d); renderCC(); }
@@ -871,16 +1051,144 @@ function doModal() {
   closeModal();
 }
 
+// ─── MODAL EDITAR PARCELA ────────────────────────────────────────
+let pmSec = null, pmIdx = null;
+function openParcModal(s, i) {
+  pmSec = s; pmIdx = i;
+  const item = loadSec(s)[i]; if (!item) return;
+  const p = item.parcela || { ativo:false, atual:1, total:1 };
+  document.getElementById('pm-desc').textContent = item.name || 'Item';
+  document.getElementById('pm-check').checked = !!p.ativo;
+  document.getElementById('pm-atual').value = p.atual || 1;
+  document.getElementById('pm-total').value = p.total || 1;
+  pmToggle();
+  document.getElementById('parc-modal-bg').classList.add('open');
+}
+function pmToggle() {
+  const on = document.getElementById('pm-check').checked;
+  document.getElementById('pm-fields').style.display = on ? '' : 'none';
+}
+function closeParcModal() { document.getElementById('parc-modal-bg').classList.remove('open'); }
+function saveParcModal() {
+  if (pmSec===null) return;
+  const on    = document.getElementById('pm-check').checked;
+  const atual = parseInt(document.getElementById('pm-atual').value)||1;
+  const total = parseInt(document.getElementById('pm-total').value)||1;
+  const d = loadSec(pmSec);
+  d[pmIdx].parcela = { ativo:on, atual, total:Math.max(atual,total) };
+  saveSec(pmSec, d);
+  closeParcModal();
+  renderSec(pmSec);
+}
+
 document.getElementById('modal-bg').addEventListener('click', e => {
   if (e.target===e.currentTarget) closeModal();
 });
+document.getElementById('parc-modal-bg').addEventListener('click', e => {
+  if (e.target===e.currentTarget) closeParcModal();
+});
 document.addEventListener('keydown', e => {
   if (e.key==='Enter') {
-    if (document.getElementById('modal-bg').classList.contains('open'))       doModal();
+    if (document.getElementById('parc-modal-bg').classList.contains('open')) saveParcModal();
+    else if (document.getElementById('modal-bg').classList.contains('open')) doModal();
     if (document.getElementById('init-modal-bg').classList.contains('open')) initPeriod();
   }
-  if (e.key==='Escape') closeModal();
+  if (e.key==='Escape') { closeModal(); closeParcModal(); }
 });
+
+// ─── MENU / ABAS ─────────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-'+tab));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.tab === tab));
+  closeSidebar();
+  if (tab === 'fixas') renderChart(); // o canvas precisa da largura real ao ficar visível
+  if (tab === 'faturas') loadFaturas();
+}
+function toggleSidebar() {
+  const open = document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('open', open);
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+}
+
+// ─── FATURAS DE CARTÃO DE CRÉDITO ────────────────────────────────
+async function loadFaturas() {
+  const tbody = document.getElementById('tbody-faturas');
+  if (!tbody) return;
+  const { data, error } = await _sb.from('fin_faturas')
+    .select('*').eq('ano', cY).eq('mes', cM).order('created_at', { ascending:false });
+  if (error) {
+    tbody.innerHTML = `<tr><td colspan="4" style="color:var(--red);padding:14px">Não foi possível carregar as faturas. Já rodou o script SQL de setup? (${esc(error.message)})</td></tr>`;
+    return;
+  }
+  renderFaturas(data || []);
+}
+function renderFaturas(list) {
+  const tbody = document.getElementById('tbody-faturas');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="4" style="color:var(--muted);text-align:center;padding:18px">Nenhuma fatura enviada para ${MONTHS[cM]} ${cY}.</td></tr>`;
+    return;
+  }
+  list.forEach(f => {
+    const dt = f.created_at ? new Date(f.created_at).toLocaleString('pt-BR') : '—';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${esc(f.cartao) || '<span style="color:var(--muted)">—</span>'}</td>
+      <td>${esc(f.file_name || '—')}</td>
+      <td style="color:var(--muted);font-size:12px;white-space:nowrap">${dt}</td>
+      <td class="act-cell" style="width:96px">
+        <button class="parc-btn" onclick="viewFatura('${esc(f.file_path)}')" title="Abrir fatura">↗</button>
+        <button class="del-btn" onclick="delFatura(${f.id},'${esc(f.file_path)}')" title="Remover">×</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+async function uploadFatura() {
+  const cartao = document.getElementById('fat-cartao').value.trim();
+  const fileEl = document.getElementById('fat-file');
+  const status = document.getElementById('fat-status');
+  const btn    = document.getElementById('fat-upload-btn');
+  const file   = fileEl.files[0];
+  const setMsg = (msg, cor) => { status.innerHTML = `<p style="color:${cor}">${msg}</p>`; };
+  if (!file) { setMsg('Selecione um arquivo.', 'var(--red)'); return; }
+  const okExt = /\.(pdf|jpe?g|png|webp|heic|heif)$/i.test(file.name);
+  if (!okExt) { setMsg('Tipo não permitido. Envie um PDF ou uma imagem.', 'var(--red)'); return; }
+  btn.disabled = true;
+  setMsg('Enviando…', 'var(--muted)');
+  const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const path = `${cY}/${cM}/${Date.now()}_${safe}`;
+  const up = await _sb.storage.from('faturas').upload(path, file, { upsert:false });
+  if (up.error) { btn.disabled = false; setMsg('Erro no upload: ' + esc(up.error.message), 'var(--red)'); return; }
+  const ins = await _sb.from('fin_faturas').insert({
+    ano: cY, mes: cM, cartao, file_path: path,
+    file_name: file.name, mime: file.type || null, tamanho: file.size
+  });
+  if (ins.error) {
+    await _sb.storage.from('faturas').remove([path]); // desfaz o upload se o registro falhar
+    btn.disabled = false; setMsg('Erro ao salvar o registro: ' + esc(ins.error.message), 'var(--red)'); return;
+  }
+  fileEl.value = ''; document.getElementById('fat-cartao').value = '';
+  btn.disabled = false;
+  setMsg('✓ Fatura enviada!', 'var(--green)');
+  setTimeout(() => { if (status) status.innerHTML = ''; }, 2500);
+  loadFaturas();
+}
+async function viewFatura(path) {
+  const { data, error } = await _sb.storage.from('faturas').createSignedUrl(path, 3600);
+  if (error) { alert('Não foi possível abrir a fatura: ' + error.message); return; }
+  window.open(data.signedUrl, '_blank');
+}
+async function delFatura(id, path) {
+  if (!confirm('Remover esta fatura? Esta ação não pode ser desfeita.')) return;
+  await _sb.storage.from('faturas').remove([path]);
+  const { error } = await _sb.from('fin_faturas').delete().eq('id', id);
+  if (error) { alert('Erro ao remover: ' + error.message); return; }
+  loadFaturas();
+}
 
 // ─── NAVEGAÇÃO DE MÊS ────────────────────────────────────────────
 async function changeMonth(dir) {
@@ -1053,13 +1361,14 @@ async function loadUI() {
   ['salario','proventos','saldo'].forEach(k => {
     document.getElementById('lbl-'+k).textContent = cfgGet('lbl_'+k, lblDef[k]);
   });
-  const snDef = { fixas:'Gastos Fixos', cartao:'Contas parceladas no cartão', ia:'Gastos com IA' };
+  const snDef = { fixas:'Gastos Fixos', cartao:'Contas parceladas e fixas no cartão', ia:'Gastos com IA' };
   ['fixas','cartao','ia'].forEach(s => {
     document.getElementById('sn-'+s).textContent = cfgGet('sn_'+s, snDef[s]);
   });
 
   renderCC();
   renderAll();
+  if (document.getElementById('panel-faturas')?.classList.contains('active')) loadFaturas();
   document.body.classList.remove('loading');
 }
 
