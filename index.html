@@ -30,18 +30,20 @@ header h1{font-family:'DM Serif Display',serif;font-size:19px;color:var(--gold);
   width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:14px;transition:all .2s;}
 .month-selector button:hover{border-color:var(--gold);color:var(--gold);}
 #month-label{font-weight:600;min-width:130px;text-align:center;}
-.rep-btn{background:var(--surface2);border:1px solid var(--border);color:var(--muted);
-  padding:6px 14px;border-radius:8px;cursor:pointer;font-size:12px;
+.rep-btn{background:var(--gold-soft);border:2px solid var(--gold);color:var(--gold);
+  padding:6px 15px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;
   transition:all .2s;font-family:'DM Sans',sans-serif;white-space:nowrap;}
-.rep-btn:hover{border-color:var(--gold);color:var(--gold);}
+.rep-btn:hover{background:var(--gold);color:var(--bg);}
 
 /* CONTAINER */
 .container{max-width:1140px;margin:0 auto;padding:22px 18px;}
 
 /* SUMMARY CARDS */
-.summary-grid{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:26px;}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));
+  gap:12px;margin-bottom:26px;align-items:stretch;}
 .summary-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;
-  padding:16px 18px;position:relative;overflow:hidden;flex:1;min-width:150px;}
+  padding:15px 18px;position:relative;overflow:hidden;min-height:84px;
+  display:flex;flex-direction:column;justify-content:space-between;}
 .summary-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
 .c-red::before{background:var(--red);}
 .c-green::before{background:var(--green);}
@@ -70,8 +72,8 @@ header h1{font-family:'DM Serif Display',serif;font-size:19px;color:var(--gold);
 .c-blue .edit-inline{color:var(--blue);}
 .c-teal .edit-inline{color:#3ab5b0;}
 .add-card-btn{background:var(--surface);border:1px dashed var(--border);border-radius:14px;
-  padding:16px 18px;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:6px;cursor:pointer;transition:all .2s;min-width:120px;flex:0 0 120px;color:var(--muted);}
+  padding:15px 18px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:6px;cursor:pointer;transition:all .2s;color:var(--muted);min-height:84px;}
 .add-card-btn:hover{border-color:var(--gold);color:var(--gold);}
 .add-card-btn span{font-size:22px;line-height:1;}
 .add-card-btn small{font-size:11px;text-transform:uppercase;letter-spacing:.08em;}
@@ -216,15 +218,17 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
   min-height:calc(100vh - 60px);position:sticky;top:60px;padding:16px 12px;align-self:stretch;}
 .sidebar-title{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);
   padding:4px 10px 10px;font-weight:500;}
-.nav-item{display:flex;align-items:flex-start;gap:9px;padding:11px 12px;border-radius:9px;
+.nav-item{display:flex;align-items:center;gap:9px;padding:11px 12px;border-radius:9px;
   cursor:pointer;color:var(--muted);font-size:13.5px;font-weight:500;margin-bottom:3px;
-  transition:all .15s;border:1px solid transparent;line-height:1.35;}
+  transition:all .15s;border:1px solid transparent;}
 .nav-item:hover{background:var(--surface2);color:var(--text);}
 .nav-item.active{background:var(--gold-soft);color:var(--gold);border-color:rgba(201,168,76,.35);}
-.nav-ico{font-size:15px;width:20px;text-align:center;flex:0 0 20px;line-height:1.35;}
-.nav-tag{display:inline-block;font-size:8.5px;text-transform:uppercase;letter-spacing:.04em;
-  color:var(--purple);background:rgba(139,111,201,.14);padding:1px 5px;border-radius:4px;
-  font-weight:600;white-space:nowrap;vertical-align:middle;}
+.nav-ico{font-size:15px;width:20px;text-align:center;flex:0 0 20px;}
+.nav-txt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.nav-star{color:var(--purple);font-weight:700;margin-left:2px;}
+.nav-legend{margin-top:14px;padding:8px 12px 0;border-top:1px solid var(--border);
+  font-size:10.5px;color:var(--muted);}
+.nav-legend .nav-star{margin-left:0;margin-right:4px;}
 .content{flex:1;min-width:0;padding:22px 18px;max-width:1140px;margin:0 auto;}
 .tab-panel{display:none;}
 .tab-panel.active{display:block;}
@@ -281,7 +285,7 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
 }
 
 @media(max-width:760px){
-  .summary-card,.add-card-btn{min-width:calc(50% - 7px);flex-basis:calc(50% - 7px);}
+  .summary-grid{grid-template-columns:repeat(2,1fr);}
   header{height:auto;padding:10px 14px;flex-wrap:wrap;}
   .header-right{flex-wrap:wrap;justify-content:flex-end;gap:8px;}
 }
@@ -342,15 +346,16 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-title">Menu</div>
     <div class="nav-item active" data-tab="fixas" onclick="switchTab('fixas')">
-      <span class="nav-ico">📌</span> Gastos Fixos</div>
+      <span class="nav-ico">📌</span><span class="nav-txt">Gastos Fixos</span></div>
     <div class="nav-item" data-tab="cartao" onclick="switchTab('cartao')">
-      <span class="nav-ico">💳</span> Contas parceladas e fixas no cartão <span class="nav-tag">consultivo</span></div>
+      <span class="nav-ico">💳</span><span class="nav-txt">Contas parceladas<span class="nav-star">*</span></span></div>
     <div class="nav-item" data-tab="ia" onclick="switchTab('ia')">
-      <span class="nav-ico">🤖</span> Gastos com IA <span class="nav-tag">consultivo</span></div>
+      <span class="nav-ico">🤖</span><span class="nav-txt">Gastos com IA<span class="nav-star">*</span></span></div>
     <div class="nav-item" data-tab="investimentos" onclick="switchTab('investimentos')">
-      <span class="nav-ico">📈</span> Investimentos <span class="nav-tag">consultivo</span></div>
+      <span class="nav-ico">📈</span><span class="nav-txt">Investimentos<span class="nav-star">*</span></span></div>
     <div class="nav-item" data-tab="faturas" onclick="switchTab('faturas')">
-      <span class="nav-ico">🧾</span> Faturas de Cartão de Crédito</div>
+      <span class="nav-ico">🧾</span><span class="nav-txt">Faturas de Cartão</span></div>
+    <div class="nav-legend"><span class="nav-star">*</span>consultivo (não entra no cálculo final)</div>
   </aside>
 
   <!-- ═══ CONTEÚDO ═══ -->
@@ -358,17 +363,13 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
 
   <!-- ═══ SUMMARY CARDS ═══ -->
   <div class="summary-grid" id="summary-grid">
-    <div class="summary-card c-red">
-      <div class="card-label-wrap"><span class="card-label">Total de Gastos</span></div>
-      <div class="card-value" id="sum-total">R$ 0,00</div>
-    </div>
-    <div class="summary-card c-green">
-      <div class="card-label-wrap"><span class="card-label">Gastos Fixos · Já Pago</span></div>
-      <div class="card-value" id="sum-pago">R$ 0,00</div>
-    </div>
-    <div class="summary-card c-gold">
-      <div class="card-label-wrap"><span class="card-label">Gastos Fixos · A Pagar</span></div>
-      <div class="card-value" id="sum-apagar">R$ 0,00</div>
+    <div class="summary-card c-teal">
+      <div class="card-label-wrap">
+        <span class="card-label" id="lbl-saldo">Saldo em Conta</span>
+        <button class="icon-btn" onclick="openRenameFixed('saldo')" title="Renomear">✎</button>
+      </div>
+      <input class="edit-inline" id="field-saldo" value="R$ 0,00" style="color:#3ab5b0"
+        oninput="numOnly(this,true)" onblur="saveCampo('saldo',this,true)" onfocus="selAll(this)">
     </div>
     <div class="summary-card c-green">
       <div class="card-label-wrap">
@@ -386,17 +387,21 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
       <input class="edit-inline" id="field-proventos" value="R$ 0,00" style="color:var(--blue)"
         oninput="numOnly(this)" onblur="saveCampo('proventos',this)" onfocus="selAll(this)">
     </div>
-    <div class="summary-card c-gold">
-      <div class="card-label-wrap"><span class="card-label">Sobra do Mês</span></div>
-      <div class="card-value" id="sum-sobra">R$ 0,00</div>
+    <div class="summary-card c-red">
+      <div class="card-label-wrap"><span class="card-label">Total de Gastos</span></div>
+      <div class="card-value" id="sum-total">R$ 0,00</div>
     </div>
-    <div class="summary-card c-teal">
-      <div class="card-label-wrap">
-        <span class="card-label" id="lbl-saldo">Saldo em Conta na virada do mês</span>
-        <button class="icon-btn" onclick="openRenameFixed('saldo')" title="Renomear">✎</button>
-      </div>
-      <input class="edit-inline" id="field-saldo" value="R$ 0,00" style="color:#3ab5b0"
-        oninput="numOnly(this,true)" onblur="saveCampo('saldo',this,true)" onfocus="selAll(this)">
+    <div class="summary-card c-green">
+      <div class="card-label-wrap"><span class="card-label">Gastos Fixos · Já Pago</span></div>
+      <div class="card-value" id="sum-pago">R$ 0,00</div>
+    </div>
+    <div class="summary-card c-gold">
+      <div class="card-label-wrap"><span class="card-label">Gastos Fixos · A Pagar</span></div>
+      <div class="card-value" id="sum-apagar">R$ 0,00</div>
+    </div>
+    <div class="summary-card c-purple">
+      <div class="card-label-wrap"><span class="card-label">Possível Sobra do Mês</span></div>
+      <div class="card-value" id="sum-sobra">R$ 0,00</div>
     </div>
     <div id="custom-cards"></div>
     <button class="add-card-btn" onclick="openAddCard()"><span>＋</span><small>Novo Card</small></button>
@@ -1126,7 +1131,7 @@ function openRenameFixed(k) {
   mMode='rename-fixed'; mKey=k;
   document.getElementById('modal-title').textContent = 'Renomear';
   document.getElementById('m-name').value = cfgGet('lbl_'+k, {
-    salario:'Salário', proventos:'Demais Proventos', saldo:'Saldo em Conta na virada do mês'
+    salario:'Salário', proventos:'Demais Proventos', saldo:'Saldo em Conta'
   }[k]);
   showFields(false,false); openModal();
 }
@@ -1466,7 +1471,7 @@ async function loadUI() {
   document.getElementById('field-proventos').value = state.campos.proventos || 'R$ 0,00';
   document.getElementById('field-saldo').value     = state.campos.saldo     || 'R$ 0,00';
 
-  const lblDef = { salario:'Salário', proventos:'Demais Proventos', saldo:'Saldo em Conta na virada do mês' };
+  const lblDef = { salario:'Salário', proventos:'Demais Proventos', saldo:'Saldo em Conta' };
   ['salario','proventos','saldo'].forEach(k => {
     document.getElementById('lbl-'+k).textContent = cfgGet('lbl_'+k, lblDef[k]);
   });

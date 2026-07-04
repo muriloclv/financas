@@ -88,8 +88,10 @@ virar o padrão brasileiro `R$ 1.234,56`. Sempre usar **vírgula** para centavos
 
 ### Validações
 
-- [x] ~~Colocar Atual `8` e De `3` e salvar → total é corrigido para 8/8.~~
-      **(comportamento alterado — ver Rodada 2, item C)**
+- [x] ~~Colocar Atual~~ `8` ~~e De~~ `3` ~~e salvar → total é corrigido para 8/8.~~
+  ```
+  **(comportamento alterado — ver Rodada 2, item C)**
+  ```
 - [x] Botão **Cancelar** (ou tecla Esc) fecha sem alterar nada.
 - [x] Tecla **Enter** dentro do modal salva.
 - [x] Recarregar a página: a parcela editada persiste (salva no Supabase).
@@ -225,9 +227,14 @@ ficam sempre no topo. O gráfico fica na aba Gastos Fixos.
 juntos o que ela deve filtrar (iFood, combustível, mercado, etc.).
 
 ---
+
 ---
 
+
+
 # 🧪 RODADA 2 — Novas alterações
+
+
 
 ## A — Campos de valor: só números + limite de R$ 999.999,99
 
@@ -235,46 +242,100 @@ juntos o que ela deve filtrar (iFood, combustível, mercado, etc.).
 (8 dígitos). Acima disso, aparece um aviso (toast vermelho na base da tela) e o valor
 **não é aceito** (o campo volta ao valor anterior).
 
-- [ ] Tentar digitar letras em Salário / valor de gasto / investimento / card → letras não entram.
-- [ ] Digitar `1000000` (um milhão) em qualquer campo de valor → aparece o aviso
-      "Valor máximo permitido: R$ 999.999,99" e o campo volta ao valor anterior.
-- [ ] Digitar `999999,99` → é aceito e vira `R$ 999.999,99`.
-- [ ] Testar o limite em: card de topo (Salário), tabela (Gasto Fixo), Investimento,
-      card personalizado e no formulário "+ Adicionar".
-- [ ] Saldo em Conta ainda aceita o sinal de menos (ex.: `-500`).
+- [x] Tentar digitar letras em Salário / valor de gasto / investimento / card → letras não entram.
+- [x] Digitar `1000000` (um milhão) em qualquer campo de valor → aparece o aviso
+  ```
+  "Valor máximo permitido: R$ 999.999,99" e o campo volta ao valor anterior.
+  ```
+- [x] Digitar `999999,99` → é aceito e vira `R$ 999.999,99`.
+- [x] Testar o limite em: card de topo (Salário), tabela (Gasto Fixo), Investimento,
+  ```
+  card personalizado e no formulário "+ Adicionar".
+  ```
+- [x] Saldo em Conta ainda aceita o sinal de menos (ex.: `-500`).
+
+
 
 ## B — Card com opção de influenciar a Sobra do Mês
 
 **Regra:** ao criar/editar um card, há a opção "Este card entra no cálculo da Sobra".
 Se ligada, você escolhe **+ Soma (receita)** ou **− Subtrai (despesa)**.
 
-- [ ] Criar card "BICO" = `R$ 500,00`, marcar influência, escolher **+ Soma** → a
-      **Sobra do Mês** aumenta em R$ 500,00 e o card mostra o selo "↑ Sobra" (verde).
-- [ ] Criar card "EXTRA" = `R$ 200,00`, influência **− Subtrai** → a Sobra diminui
-      R$ 200,00 e o card mostra "↓ Sobra" (vermelho).
-- [ ] Criar card SEM marcar influência → não altera a Sobra e não tem selo.
-- [ ] Editar o valor de um card que influencia (inline) → a Sobra recalcula.
-- [ ] Remover um card que influencia → a Sobra volta ao valor sem ele.
-- [ ] Recarregar a página: a configuração de influência persiste.
+- [x] Criar card "BICO" = `R$ 500,00`, marcar influência, escolher **+ Soma** → a
+  ```
+  **Sobra do Mês** aumenta em R$ 500,00 e o card mostra o selo "↑ Sobra" (verde).
+  ```
+- [x] Criar card "EXTRA" = `R$ 200,00`, influência **− Subtrai** → a Sobra diminui
+  ```
+  R$ 200,00 e o card mostra "↓ Sobra" (vermelho).
+  ```
+- [x] Criar card SEM marcar influência → não altera a Sobra e não tem selo.
+- [x] Editar o valor de um card que influencia (inline) → a Sobra recalcula.
+- [x] Remover um card que influencia → a Sobra volta ao valor sem ele.
+- [x] Recarregar a página: a configuração de influência persiste.
+
+
 
 ## C — Parcela: erro quando atual > total
 
 **Regra:** no modal de editar parcela, se a parcela atual for maior que o total,
 aparece uma mensagem vermelha embaixo e **não salva**.
 
-- [ ] Abrir editar parcela, marcar Parcelado, colocar Atual `8` e De `3`, clicar Salvar →
-      mensagem vermelha "Não é possível: a parcela atual é maior que o número de parcelas."
-      e o modal continua aberto (não salvou).
-- [ ] Corrigir para Atual `3` e De `8` → salva normal (3/8) e a mensagem some.
+- [x] Abrir editar parcela, marcar Parcelado, colocar Atual `8` e De `3`, clicar Salvar →
+  ```
+  mensagem vermelha "Não é possível: a parcela atual é maior que o número de parcelas."
+  e o modal continua aberto (não salvou).
+  ```
+- [x] Corrigir para Atual `3` e De `8` → salva normal (3/8) e a mensagem some.
+
+
 
 ## D — Modal de parcela não fecha ao clicar fora
 
-- [ ] Abrir o modal de editar parcela e clicar **fora** dele (na área escura) → NÃO fecha.
-- [ ] Fecha apenas clicando em **Cancelar** ou **Salvar**. (A tecla Esc também cancela.)
+- [x] Abrir o modal de editar parcela e clicar **fora** dele (na área escura) → NÃO fecha.
+- [x] Fecha apenas clicando em **Cancelar** ou **Salvar**. (A tecla Esc também cancela.)
+
+
 
 ## E — Sem botão "Pago" em Cartão e Gastos com IA
 
-- [ ] Nas linhas de **Contas parceladas e fixas no cartão**: só os botões ✎ (parcela) e × (remover).
-- [ ] Nas linhas de **Gastos com IA**: só ✎ e ×.
-- [ ] Em **Gastos Fixos**: continua com ✎, ✓ (pago) e ×.
+- [x] Nas linhas de **Contas parceladas e fixas no cartão**: só os botões ✎ (parcela) e × (remover).
+- [x] Nas linhas de **Gastos com IA**: só ✎ e ×.
+- [x] Em **Gastos Fixos**: continua com ✎, ✓ (pago) e ×.
 
+---
+---
+
+# 🧪 RODADA 3 — Layout
+
+## A — Cards do topo reorganizados e uniformes
+
+**Regra:** todos os cards do topo têm o **mesmo tamanho** (grid uniforme), independente
+de haver 1, 2 ou 10 cards. Nova ordem:
+Saldo em Conta → Salário → Demais Proventos → Total de Gastos →
+Gastos Fixos · Já Pago → Gastos Fixos · A Pagar → **Possível Sobra do Mês**.
+
+- [ ] Os cards aparecem exatamente nessa ordem.
+- [ ] Todos os cards têm o mesmo tamanho (largura e altura), alinhados num grid.
+- [ ] Com poucos cards, eles NÃO ficam gigantes (mantêm o tamanho padrão).
+- [ ] Criar vários cards personalizados → todos entram no grid com o mesmo tamanho,
+      e o botão "Novo Card" também fica do mesmo tamanho.
+- [ ] O card antes chamado "Sobra do Mês" agora se chama **"Possível Sobra do Mês"**
+      (valor fica verde se positivo, vermelho se negativo).
+- [ ] O card do saldo agora mostra **"Saldo em Conta"** (nome mais curto).
+- [ ] No celular, os cards ficam em 2 colunas.
+
+## B — Menu com nomes novos, em linha única
+
+- [ ] O menu mostra: Gastos Fixos, **Contas parceladas**, **Gastos com IA**,
+      Investimentos, **Faturas de Cartão**.
+- [ ] Cada nome ocupa **uma única linha, sem reticências** (…).
+- [ ] Os 3 itens consultivos (Contas parceladas, Gastos com IA, Investimentos) têm um
+      **asterisco roxo (\*)** no fim do nome, no lugar do antigo selo "consultivo".
+- [ ] Gastos Fixos e Faturas de Cartão NÃO têm o asterisco.
+
+## C — Botão "Replicar para o mês seguinte" em destaque
+
+- [ ] O botão tem **borda dourada** e **texto em negrito**, chamando atenção no cabeçalho.
+- [ ] Ao passar o mouse, ele preenche de dourado.
+- [ ] Continua funcionando normalmente (replica os dados para o mês seguinte).
