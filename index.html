@@ -271,12 +271,31 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
 /* painel de analise da fatura */
 .ana-wrap{border:1px solid var(--border);border-radius:14px;margin-top:16px;overflow:hidden;
   background:var(--surface);}
-.ana-head{display:flex;flex-wrap:wrap;gap:18px;align-items:center;padding:14px 18px;
+.ana-head{display:flex;flex-direction:column;gap:16px;padding:18px 18px 20px;
   background:var(--surface2);border-bottom:1px solid var(--border);}
+.ana-kpis{display:flex;flex-wrap:wrap;gap:18px 26px;align-items:center;}
 .ana-kpi{display:flex;flex-direction:column;gap:2px;}
 .ana-kpi .k{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);}
 .ana-kpi .v{font-size:16px;font-weight:600;font-family:'DM Serif Display',serif;}
 .ana-kpi .v.total{color:var(--gold);}
+
+/* gráfico de rosca (distribuição dos gastos) */
+.ana-chart{display:flex;gap:26px;align-items:center;flex-wrap:wrap;
+  padding-top:16px;border-top:1px solid var(--border);}
+.donut-wrap{position:relative;width:138px;height:138px;flex:0 0 auto;}
+.donut-wrap svg{width:100%;height:100%;display:block;}
+.donut-center{position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;pointer-events:none;}
+.donut-center .dc-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);}
+.donut-center .dc-val{font-size:15px;font-weight:600;font-family:'DM Serif Display',serif;color:var(--gold);margin-top:1px;}
+.chart-legend{flex:1;min-width:230px;display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:9px 18px;}
+.leg-row{display:flex;align-items:center;gap:9px;min-width:0;}
+.leg-sw{width:11px;height:11px;border-radius:3px;flex:0 0 auto;}
+.leg-txt{display:flex;flex-direction:column;min-width:0;line-height:1.25;}
+.leg-name{font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.leg-meta{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;}
+.leg-meta b{color:var(--text);font-weight:600;}
 .ana-filters{display:flex;flex-wrap:wrap;gap:7px;padding:12px 18px;border-bottom:1px solid var(--border);}
 .cfilter{background:var(--surface2);border:1px solid var(--border);color:var(--muted);
   padding:4px 12px;border-radius:20px;cursor:pointer;font-size:12px;transition:all .2s;
@@ -1422,6 +1441,22 @@ let _anaFatura = null;    // fatura cuja análise está aberta
 let _catFilter = null;    // categoria selecionada no filtro (null = todas)
 let _estabActions = [];   // grupos "sugeridos" p/ confirmar/corrigir (por índice)
 
+// paleta categórica (validada p/ fundo escuro — dataviz). "Outros" = cinza neutro.
+const CAT_PALETTE = ['#3987e5','#199e70','#c98500','#008300','#9085e9','#e66767','#d55181','#d95926'];
+const CAT_GRAY = '#7a8099';
+// cor estável por CATEGORIA (segue a entidade, não o ranking): ordem do dicionário.
+function buildCatColors(catList) {
+  const map = {}; let i = 0;
+  const ordered = [];
+  (_catDict || []).slice().sort((a, b) => (a.ordem ?? 50) - (b.ordem ?? 50)).forEach(c => ordered.push(c.nome));
+  catList.forEach(([n]) => { if (!ordered.includes(n)) ordered.push(n); });
+  ordered.forEach(n => {
+    if (n === 'Outros') { map[n] = CAT_GRAY; }
+    else { map[n] = CAT_PALETTE[i % CAT_PALETTE.length]; i++; }
+  });
+  return map;
+}
+
 function fmtDate(s) {
   if (!s) return '—';
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(s));
@@ -1494,15 +1529,50 @@ function renderAnalise() {
   const catList = Object.entries(cats).sort((x, y) => y[1].total - x[1].total); // maior gasto 1º
   const totalGeral = lancs.reduce((s, l) => s + (+l.valor || 0), 0);
   const catNames = (_catDict && _catDict.length) ? _catDict.map(c => c.nome) : catList.map(c => c[0]);
+  const colors = buildCatColors(catList);
   _estabActions = [];
+
+  // rosca (donut): fatia por categoria, % sobre o total de gastos classificados
+  let donut = '';
+  if (totalGeral > 0) {
+    const track = `<circle cx="21" cy="21" r="15.915" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="4.4"/>`;
+    let acc = 0;
+    const slices = catList.filter(([, info]) => info.total > 0).map(([nome, info]) => {
+      const pct = info.total / totalGeral * 100;
+      const off = (25 - acc).toFixed(3);   // começa no topo, sentido horário
+      acc += pct;
+      return `<circle cx="21" cy="21" r="15.915" fill="none" stroke="${colors[nome]}" stroke-width="4.4"
+        stroke-dasharray="${pct.toFixed(3)} ${(100 - pct).toFixed(3)}" stroke-dashoffset="${off}"
+        stroke-linecap="butt"><title>${esc(nome)}: ${pct.toFixed(1)}% · ${fmt(info.total)}</title></circle>`;
+    }).join('');
+    const legend = catList.map(([nome, info]) => {
+      const pct = (info.total / totalGeral * 100).toFixed(1).replace('.', ',');
+      return `<div class="leg-row">
+        <span class="leg-sw" style="background:${colors[nome]}"></span>
+        <span class="leg-txt">
+          <span class="leg-name">${esc(nome)}</span>
+          <span class="leg-meta"><b>${pct}%</b> · ${fmt(info.total)}</span>
+        </span></div>`;
+    }).join('');
+    donut = `<div class="ana-chart">
+      <div class="donut-wrap">
+        <svg viewBox="0 0 42 42" role="img" aria-label="Distribuição dos gastos por categoria">${track}${slices}</svg>
+        <div class="donut-center"><span class="dc-lbl">gastos</span><span class="dc-val">${fmt(totalGeral)}</span></div>
+      </div>
+      <div class="chart-legend">${legend}</div>
+    </div>`;
+  }
 
   let html = `<div class="ana-wrap">
     <div class="ana-head">
-      <div class="ana-kpi"><span class="k">Total da fatura</span><span class="v total">${fmt(a.total ?? totalGeral)}</span></div>
-      <div class="ana-kpi"><span class="k">Vencimento</span><span class="v">${fmtDate(a.vencimento)}</span></div>
-      ${a.fechamento ? `<div class="ana-kpi"><span class="k">Fechamento</span><span class="v">${fmtDate(a.fechamento)}</span></div>` : ''}
-      ${a.cartao ? `<div class="ana-kpi"><span class="k">Cartão</span><span class="v">${esc(a.cartao)}</span></div>` : ''}
-      <div class="ana-kpi" style="margin-left:auto"><span class="k">Lançamentos</span><span class="v">${lancs.length}</span></div>
+      <div class="ana-kpis">
+        <div class="ana-kpi"><span class="k">Total da fatura</span><span class="v total">${fmt(a.total ?? totalGeral)}</span></div>
+        <div class="ana-kpi"><span class="k">Vencimento</span><span class="v">${fmtDate(a.vencimento)}</span></div>
+        ${a.fechamento ? `<div class="ana-kpi"><span class="k">Fechamento</span><span class="v">${fmtDate(a.fechamento)}</span></div>` : ''}
+        ${a.cartao ? `<div class="ana-kpi"><span class="k">Cartão</span><span class="v">${esc(a.cartao)}</span></div>` : ''}
+        <div class="ana-kpi" style="margin-left:auto"><span class="k">Lançamentos</span><span class="v">${lancs.length}</span></div>
+      </div>
+      ${donut}
     </div>
     <div class="ana-filters">
       <button class="cfilter ${_catFilter === null ? 'active' : ''}" onclick="setCatFilter(null)">Todas <span class="cf-val">${fmt(totalGeral)}</span></button>`;
@@ -1513,7 +1583,9 @@ function renderAnalise() {
 
   catList.forEach(([nome, info]) => {
     if (_catFilter && _catFilter !== nome) return;
-    html += `<div class="cat-group">
+    // fechadas por padrão (minimalista); ao filtrar uma categoria, ela abre
+    const collapsed = _catFilter ? '' : 'collapsed';
+    html += `<div class="cat-group ${collapsed}">
       <div class="cat-group-head" onclick="this.parentElement.classList.toggle('collapsed')">
         <span class="cg-name"><span class="cg-caret">▼</span> ${esc(nome)}</span>
         <span class="cg-total">${fmt(info.total)}</span>

@@ -419,8 +419,13 @@ editável (⚙️) ensina a IA a qual categoria cada estabelecimento pertence.
       **total** da fatura continua correto mesmo sem essas linhas.
 - [ ] As **categorias** vêm ordenadas por maior gasto; dentro de cada uma, os
       **estabelecimentos** também do maior para o menor.
-- [ ] Clicar numa categoria no filtro mostra só ela; "Todas" volta a mostrar tudo.
-- [ ] Clicar no cabeçalho de uma categoria recolhe/expande os estabelecimentos.
+- [ ] As categorias vêm **fechadas por padrão** (visão minimalista); clicar no cabeçalho
+      **expande** para ver gasto por gasto. Clicar de novo fecha.
+- [ ] No card principal há um **gráfico de rosca** com a % de cada categoria sobre o total
+      de gastos, com legenda (categoria, % e valor) e o total no centro.
+- [ ] As cores da rosca batem com as da legenda e cada categoria mantém sua cor.
+- [ ] Clicar numa categoria no filtro mostra só ela **já expandida**; "Todas" volta a
+      mostrar tudo (fechado).
 - [ ] Repetir com uma **imagem** (JPG/PNG) de fatura → também analisa.
 - [ ] Recarregar a página e clicar **Ver** → a análise persiste (salva em `fin_faturas.analise`).
 
