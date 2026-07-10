@@ -101,10 +101,18 @@ Deno.serve(async (req) => {
       : { type: "image_url", image_url: { url: `data:${mime};base64,${base64}` } };
 
     const prompt = `Você é um extrator de faturas de cartão de crédito brasileiras. Analise o documento e extraia:
-- o valor TOTAL da fatura;
+- o valor TOTAL da fatura (o total ATUAL a pagar);
 - a data de VENCIMENTO (e a de fechamento, se houver);
 - o nome/bandeira do cartão;
-- TODOS os lançamentos, sem pular nenhum, com descrição, estabelecimento normalizado, valor, data e parcela.
+- APENAS as COMPRAS/GASTOS reais do titular, com descrição, estabelecimento normalizado, valor, data e parcela.
+
+NÃO INCLUA nos "lancamentos" (guardrail — estas linhas NÃO são gastos, são acerto de conta da fatura):
+- "Saldo/Total da fatura anterior", "Fatura anterior", "Saldo anterior";
+- "Pagamento", "Pagamento efetuado", "Pagamento recebido", "PGTO", "Pgto débito automático";
+- Créditos/estornos que se referem a pagamento da fatura anterior;
+- Juros, multa, IOF, encargos e anuidade SÓ se o objetivo fosse gasto de consumo — em dúvida, INCLUA encargos como "Outros", mas NUNCA inclua pagamentos e saldo anterior.
+Ignore por completo essas linhas: elas não devem aparecer na lista, nem entrar em nenhuma categoria.
+O campo "total" continua sendo o total atual da fatura (não somar/subtrair a partir dos lançamentos).
 
 CLASSIFICAÇÃO — para cada lançamento defina "categoria" usando SOMENTE esta lista fixa:
 ${listaNomes.join(", ")}

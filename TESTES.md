@@ -414,6 +414,9 @@ editável (⚙️) ensina a IA a qual categoria cada estabelecimento pertence.
 - [ ] Enviar uma fatura (PDF) e clicar **🤖 Analisar com IA** → aparece "Analisando…" e
       depois o painel com **total** e **vencimento** corretos.
 - [ ] Todos (ou quase todos) os **lançamentos** aparecem, agrupados por categoria.
+- [ ] **Guardrail:** linhas de "Total/Saldo da fatura anterior", "Pagamento efetuado/recebido"
+      e créditos de pagamento **NÃO** aparecem na lista (não são gastos do titular). O
+      **total** da fatura continua correto mesmo sem essas linhas.
 - [ ] As **categorias** vêm ordenadas por maior gasto; dentro de cada uma, os
       **estabelecimentos** também do maior para o menor.
 - [ ] Clicar numa categoria no filtro mostra só ela; "Todas" volta a mostrar tudo.
