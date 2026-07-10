@@ -221,10 +221,11 @@ ficam sempre no topo. O gráfico fica na aba Gastos Fixos.
 
 
 
-### Observação (fase futura)
+### Observação
 
-- A **IA que lê a fatura** ainda NÃO foi implementada — faremos isso depois, definindo
-juntos o que ela deve filtrar (iFood, combustível, mercado, etc.).
+- A **IA que lê a fatura** foi implementada na **Rodada 4** (ver seção no fim deste
+documento): extrai total, vencimento e lançamentos, classificando cada um por categoria
+(iFood, mercado, combustível, etc.) com um dicionário editável.
 
 ---
 
@@ -304,9 +305,14 @@ aparece uma mensagem vermelha embaixo e **não salva**.
 - [x] Em **Gastos Fixos**: continua com ✎, ✓ (pago) e ×.
 
 ---
+
 ---
 
+
+
 # 🧪 RODADA 3 — Layout
+
+
 
 ## A — Cards do topo reorganizados e uniformes
 
@@ -315,27 +321,121 @@ de haver 1, 2 ou 10 cards. Nova ordem:
 Saldo em Conta → Salário → Demais Proventos → Total de Gastos →
 Gastos Fixos · Já Pago → Gastos Fixos · A Pagar → **Possível Sobra do Mês**.
 
-- [ ] Os cards aparecem exatamente nessa ordem.
-- [ ] Todos os cards têm o mesmo tamanho (largura e altura), alinhados num grid.
-- [ ] Com poucos cards, eles NÃO ficam gigantes (mantêm o tamanho padrão).
-- [ ] Criar vários cards personalizados → todos entram no grid com o mesmo tamanho,
-      e o botão "Novo Card" também fica do mesmo tamanho.
-- [ ] O card antes chamado "Sobra do Mês" agora se chama **"Possível Sobra do Mês"**
-      (valor fica verde se positivo, vermelho se negativo).
-- [ ] O card do saldo agora mostra **"Saldo em Conta"** (nome mais curto).
-- [ ] No celular, os cards ficam em 2 colunas.
+- [x] Os cards aparecem exatamente nessa ordem.
+- [x] Todos os cards têm o mesmo tamanho (largura e altura), alinhados num grid.
+- [x] Com poucos cards, eles NÃO ficam gigantes (mantêm o tamanho padrão).
+- [x] Criar vários cards personalizados → todos entram no grid com o mesmo tamanho,
+  ```
+  e o botão "Novo Card" também fica do mesmo tamanho.
+  ```
+- [x] O card antes chamado "Sobra do Mês" agora se chama **"Possível Sobra do Mês"**
+  ```
+  (valor fica verde se positivo, vermelho se negativo).
+  ```
+- [x] O card do saldo agora mostra **"Saldo em Conta"** (nome mais curto).
+- [x] No celular, os cards ficam em 2 colunas.
+
+
 
 ## B — Menu com nomes novos, em linha única
 
-- [ ] O menu mostra: Gastos Fixos, **Contas parceladas**, **Gastos com IA**,
-      Investimentos, **Faturas de Cartão**.
-- [ ] Cada nome ocupa **uma única linha, sem reticências** (…).
-- [ ] Os 3 itens consultivos (Contas parceladas, Gastos com IA, Investimentos) têm um
-      **asterisco roxo (\*)** no fim do nome, no lugar do antigo selo "consultivo".
-- [ ] Gastos Fixos e Faturas de Cartão NÃO têm o asterisco.
+- [x] O menu mostra: Gastos Fixos, **Contas parceladas**, **Gastos com IA**,
+  ```
+  Investimentos, **Faturas de Cartão**.
+  ```
+- [x] Cada nome ocupa **uma única linha, sem reticências** (…).
+- [x] Os 3 itens consultivos (Contas parceladas, Gastos com IA, Investimentos) têm um
+  ```
+  **asterisco roxo (\*)** no fim do nome, no lugar do antigo selo "consultivo".
+  ```
+- [x] Gastos Fixos e Faturas de Cartão NÃO têm o asterisco.
+
+
 
 ## C — Botão "Replicar para o mês seguinte" em destaque
 
-- [ ] O botão tem **borda dourada** e **texto em negrito**, chamando atenção no cabeçalho.
-- [ ] Ao passar o mouse, ele preenche de dourado.
-- [ ] Continua funcionando normalmente (replica os dados para o mês seguinte).
+- [x] O botão tem **borda dourada** e **texto em negrito**, chamando atenção no cabeçalho.
+- [x] Ao passar o mouse, ele preenche de dourado.
+- [x] Continua funcionando normalmente (replica os dados para o mês seguinte).
+
+---
+
+---
+
+
+
+# 🧪 RODADA 4 — IA que lê a fatura do cartão (OpenRouter + Claude)
+
+**Objetivo:** ao enviar uma fatura (PDF ou imagem), uma IA extrai o **total**, a data de
+**vencimento** e **todos os lançamentos**, classificando cada um por **categoria**
+(Supermercado, Delivery, Transporte, etc.). O filtro agrupa em **2 níveis**
+(categoria → estabelecimento), ordenado do **maior gasto** para o menor. Um dicionário
+editável (⚙️) ensina a IA a qual categoria cada estabelecimento pertence.
+
+## O que foi alterado
+
+**Arquivos novos**
+
+- `supabase-setup-categorias.sql` — cria a tabela `fin_categorias` (o "dicionário":
+  `nome`, `apelidos` jsonb, `ordem`) já populada com 9 categorias e apelidos de exemplo.
+- `supabase/functions/ler-fatura/index.ts` — **Edge Function** (roda no servidor do
+  Supabase). Baixa o arquivo do bucket `faturas`, carrega o dicionário, chama a
+  **OpenRouter** (modelo Claude Sonnet, saída forçada em JSON via `response_format`) e
+  grava o resultado em `fin_faturas.analise`. A chave `OPENROUTER_API_KEY` fica só aqui,
+  como *secret* — nunca no navegador. Modelo trocável pela env `OPENROUTER_MODEL`.
+
+**`index.html`** (aba "Faturas de Cartão de Crédito")
+
+- Botão de **engrenagem (⚙️)** no cabeçalho → abre o editor do dicionário de categorias.
+- Nova coluna **"Análise IA"** na tabela: botão **🤖 Analisar com IA** (chama a Edge
+  Function) e, quando pronta, selo **✓ analisada** + botão **Ver**.
+- Painel de análise `#fat-analise`: KPIs (total, vencimento, fechamento, cartão), barra de
+  **filtro por categoria** e a **árvore categoria → estabelecimento** ordenada por gasto.
+- Lançamentos que a IA **chutou** aparecem com selo **"sugerido"**, botão **"✓ é isso"** e
+  um seletor de correção — confirmar/corrigir **grava o apelido** no dicionário (a IA
+  aprende para as próximas faturas).
+- **Modal do editor de categorias** (`#cat-modal-bg`): chips por categoria com
+  adicionar/remover apelido, criar categoria nova e excluir categoria.
+- CSS e funções JS de apoio (analisarFatura, verAnalise, renderAnalise, addApelido,
+  confirmar/corrigirEstabIdx, editor do dicionário).
+
+## Setup do Supabase (fazer 1 vez)
+
+1. [ ] **SQL Editor** → colar `supabase-setup-categorias.sql` → **Run** (cria `fin_categorias`).
+2. [ ] **Edge Functions** → *Deploy a new function / Via Editor* → nome **`ler-fatura`** →
+       colar o conteúdo de `supabase/functions/ler-fatura/index.ts` → **Deploy**.
+3. [ ] **Edge Functions → Secrets** → adicionar `OPENROUTER_API_KEY` com uma chave **nova**
+       da OpenRouter (revogar a anterior). (Opcional: `OPENROUTER_MODEL` para trocar o modelo.)
+4. [ ] Conferir o ID do modelo em [openrouter.ai/models](https://openrouter.ai/models)
+       (padrão `anthropic/claude-sonnet-4.6`).
+
+## Testes — análise da fatura
+
+- [ ] Enviar uma fatura (PDF) e clicar **🤖 Analisar com IA** → aparece "Analisando…" e
+      depois o painel com **total** e **vencimento** corretos.
+- [ ] Todos (ou quase todos) os **lançamentos** aparecem, agrupados por categoria.
+- [ ] As **categorias** vêm ordenadas por maior gasto; dentro de cada uma, os
+      **estabelecimentos** também do maior para o menor.
+- [ ] Clicar numa categoria no filtro mostra só ela; "Todas" volta a mostrar tudo.
+- [ ] Clicar no cabeçalho de uma categoria recolhe/expande os estabelecimentos.
+- [ ] Repetir com uma **imagem** (JPG/PNG) de fatura → também analisa.
+- [ ] Recarregar a página e clicar **Ver** → a análise persiste (salva em `fin_faturas.analise`).
+
+## Testes — dicionário e aprendizado (⚙️)
+
+- [ ] Abrir a engrenagem → aparecem as 9 categorias com seus apelidos em chips.
+- [ ] Adicionar um apelido (ex.: "Carrefour" em Supermercado) e remover outro → persiste
+      ao reabrir o modal.
+- [ ] Criar uma categoria nova (ex.: "Pets") e excluí-la → funciona.
+- [ ] Um lançamento **desconhecido** vem com selo **"sugerido"**; clicar **"✓ é isso"**
+      remove o selo e adiciona o estabelecimento como apelido daquela categoria.
+- [ ] Usar o **seletor** para mover um lançamento sugerido para outra categoria → ele muda
+      de grupo e o apelido é gravado na categoria escolhida.
+- [ ] Analisar de novo uma fatura com o mesmo estabelecimento → agora ele já entra
+      classificado (sem o selo "sugerido").
+
+## Segurança
+
+- [ ] A `OPENROUTER_API_KEY` **não** aparece em nenhum lugar do `index.html` (só como secret
+      no servidor). Conferir com F12 → nenhuma chave `sk-or-...` no código da página.
+- [ ] Nenhum erro no Console (F12) durante a análise.
