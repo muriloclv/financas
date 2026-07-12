@@ -370,6 +370,16 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
   padding:16px;color:var(--text);font-size:13.5px;line-height:1.55;}
 @media(max-width:560px){.plan-horizons{grid-template-columns:1fr;}}
 
+/* login / autenticação */
+.user-box{display:flex;align-items:center;gap:8px;}
+#hdr-user{font-size:12px;color:var(--muted);white-space:nowrap;}
+.logout-btn{background:none;border:1px solid var(--border);color:var(--muted);
+  padding:5px 12px;border-radius:8px;cursor:pointer;font-size:12px;transition:all .2s;white-space:nowrap;}
+.logout-btn:hover{border-color:var(--red);color:var(--red);}
+.auth-toggle{text-align:center;margin-top:14px;font-size:12.5px;color:var(--muted);}
+.auth-toggle a{color:var(--gold);text-decoration:none;cursor:pointer;}
+.auth-toggle a:hover{text-decoration:underline;}
+
 /* toast de aviso (limite de valor, etc.) */
 #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
   background:var(--red);color:#fff;padding:11px 18px;border-radius:9px;font-size:13px;
@@ -411,8 +421,39 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
 </head>
 <body>
 
+<!-- ═══ MODAL DE LOGIN ═══ -->
+<div class="modal-bg open" id="login-modal-bg">
+  <div class="modal">
+    <h3 id="login-title">🔒 Entrar</h3>
+    <p class="modal-desc" id="login-desc">Acesse com seu e-mail e senha.</p>
+    <div class="mfield">
+      <label>E-mail</label>
+      <input id="login-email" type="email" autocomplete="email" placeholder="voce@exemplo.com"
+        onkeydown="if(event.key==='Enter')doAuth()">
+    </div>
+    <div class="mfield" id="login-name-wrap" style="display:none">
+      <label>Nome de exibição</label>
+      <input id="login-name" autocomplete="name" placeholder="ex: Murilo"
+        onkeydown="if(event.key==='Enter')doAuth()">
+    </div>
+    <div class="mfield">
+      <label>Senha</label>
+      <input id="login-pass" type="password" autocomplete="current-password" placeholder="sua senha"
+        onkeydown="if(event.key==='Enter')doAuth()">
+    </div>
+    <div class="modal-err" id="login-err" style="display:none"></div>
+    <div class="modal-actions" style="justify-content:center;margin-top:6px">
+      <button class="btn-ok lg" id="login-btn" onclick="doAuth()">Entrar</button>
+    </div>
+    <p class="auth-toggle" id="forgot-wrap"><a onclick="doReset()">Esqueci minha senha</a></p>
+    <p class="auth-toggle">
+      <span id="auth-toggle-txt">Primeira vez? </span><a id="auth-toggle-link" onclick="toggleAuthMode()">Criar conta</a>
+    </p>
+  </div>
+</div>
+
 <!-- ═══ MODAL INICIAL ═══ -->
-<div class="modal-bg open" id="init-modal-bg">
+<div class="modal-bg" id="init-modal-bg">
   <div class="modal">
     <h3>💰 Controle Financeiro</h3>
     <p class="modal-desc">Selecione o mês e ano que deseja visualizar ou editar.</p>
@@ -451,6 +492,10 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
       <button onclick="changeMonth(-1)">‹</button>
       <span id="month-label"></span>
       <button onclick="changeMonth(1)">›</button>
+    </div>
+    <div class="user-box">
+      <span id="hdr-user"></span>
+      <button class="logout-btn" onclick="doLogout()">Sair</button>
     </div>
   </div>
 </header>
@@ -1947,12 +1992,106 @@ async function loadUI() {
   document.body.classList.remove('loading');
 }
 
-// ─── INIT ────────────────────────────────────────────────────────
-(async function() {
+// ─── AUTH (login por E-MAIL + nome de exibição) ───────────────────
+// E-mail real: permite recuperação de senha e prepara o app para ser público/vendável.
+// O "nome de exibição" (metadata.username) é só o rótulo amigável mostrado na tela.
+let _authMode = 'login';
+function emailToUser(e) { return (e || '').split('@')[0]; }
+function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((e || '').trim()); }
+function authErr(msg) {
+  const el = document.getElementById('login-err');
+  el.textContent = msg || ''; el.style.display = msg ? '' : 'none';
+}
+function authMsg(msg) { // mensagem positiva (verde) no lugar do erro
+  const el = document.getElementById('login-err');
+  el.textContent = msg || ''; el.style.color = 'var(--green)'; el.style.display = msg ? '' : 'none';
+}
+function toggleAuthMode() {
+  _authMode = _authMode === 'login' ? 'signup' : 'login';
+  const s = _authMode === 'signup';
+  document.getElementById('login-title').textContent = s ? '🔒 Criar conta' : '🔒 Entrar';
+  document.getElementById('login-desc').textContent = s
+    ? 'Informe seu e-mail, um nome de exibição e uma senha (mín. 6 caracteres).'
+    : 'Acesse com seu e-mail e senha.';
+  document.getElementById('login-btn').textContent = s ? 'Criar conta' : 'Entrar';
+  document.getElementById('login-name-wrap').style.display = s ? '' : 'none';
+  document.getElementById('forgot-wrap').style.display = s ? 'none' : '';
+  document.getElementById('auth-toggle-txt').textContent = s ? 'Já tem conta? ' : 'Primeira vez? ';
+  document.getElementById('auth-toggle-link').textContent = s ? 'Entrar' : 'Criar conta';
+  document.getElementById('login-err').style.color = 'var(--red)';
+  authErr('');
+}
+function traduzAuthErro(e) {
+  const m = (e && e.message) || '';
+  if (/Invalid login/i.test(m)) return 'E-mail ou senha incorretos.';
+  if (/already registered|already been registered|User already/i.test(m)) return 'Esse e-mail já tem conta. Tente entrar.';
+  if (/signups? (not allowed|is disabled|disabled)/i.test(m)) return 'Cadastro está fechado. Libere em Auth → Providers no Supabase.';
+  if (/Email logins are disabled|provider is (not enabled|disabled)/i.test(m)) return 'Ative o provedor "Email" no Supabase (Auth → Providers).';
+  if (/Email not confirmed/i.test(m)) return 'E-mail ainda não confirmado. Confira sua caixa de entrada (ou desative "Confirm email" no Supabase).';
+  if (/at least 6/i.test(m)) return 'A senha precisa ter ao menos 6 caracteres.';
+  return m || 'Falha na autenticação.';
+}
+async function doAuth() {
+  const email = (document.getElementById('login-email').value || '').trim();
+  const p = document.getElementById('login-pass').value;
+  const nome = (document.getElementById('login-name').value || '').trim();
+  document.getElementById('login-err').style.color = 'var(--red)';
+  if (!isValidEmail(email)) { authErr('Informe um e-mail válido.'); return; }
+  if (!p || p.length < 6) { authErr('A senha precisa ter ao menos 6 caracteres.'); return; }
+  if (_authMode === 'signup' && !nome) { authErr('Informe um nome de exibição.'); return; }
+  const btn = document.getElementById('login-btn');
+  btn.disabled = true; authErr('');
+  try {
+    if (_authMode === 'signup') {
+      const { data, error } = await _sb.auth.signUp({ email, password: p, options: { data: { username: nome } } });
+      if (error) throw error;
+      // se "Confirm email" estiver ligado, não vem sessão: avisa e para aqui
+      if (!data.session) {
+        btn.disabled = false;
+        authMsg('Conta criada! Confirme pelo link enviado ao seu e-mail e depois entre.');
+        return;
+      }
+    }
+    const { error: le } = await _sb.auth.signInWithPassword({ email, password: p });
+    if (le) throw le;
+    await onAuthed();
+  } catch (e) {
+    authErr(traduzAuthErro(e));
+    btn.disabled = false;
+  }
+}
+async function doReset() {
+  const email = (document.getElementById('login-email').value || '').trim();
+  document.getElementById('login-err').style.color = 'var(--red)';
+  if (!isValidEmail(email)) { authErr('Digite seu e-mail no campo acima para recuperar a senha.'); return; }
+  const { error } = await _sb.auth.resetPasswordForEmail(email);
+  if (error) { authErr(traduzAuthErro(error)); return; }
+  authMsg('Enviamos um link de recuperação para o seu e-mail.');
+}
+async function doLogout() {
+  await _sb.auth.signOut();
+  location.reload();
+}
+// Chamado após autenticar: mostra o usuário, carrega config e abre o seletor de mês.
+async function onAuthed() {
+  const { data } = await _sb.auth.getUser();
+  const user = data?.user;
+  const uname = user?.user_metadata?.username || emailToUser(user?.email);
+  const hu = document.getElementById('hdr-user'); if (hu) hu.textContent = '👤 ' + uname;
+  document.getElementById('login-btn').disabled = false;
+  document.getElementById('login-modal-bg').classList.remove('open');
+  state.config = await db.loadConfig();
   const now = new Date();
   document.getElementById('init-month').value = now.getMonth();
   document.getElementById('init-year').value  = now.getFullYear();
-  state.config = await db.loadConfig();
+  document.getElementById('init-modal-bg').classList.add('open');
+}
+
+// ─── INIT ────────────────────────────────────────────────────────
+(async function() {
+  const { data } = await _sb.auth.getSession();
+  if (data?.session) { await onAuthed(); }          // já logado: pula o login
+  else { document.getElementById('login-modal-bg').classList.add('open'); }
 })();
 </script>
 </body>
