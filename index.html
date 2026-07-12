@@ -33,6 +33,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
   display:flex;align-items:center;justify-content:space-between;height:60px;
   position:sticky;top:0;z-index:200;gap:12px;}
 header h1{font-family:'DM Serif Display',serif;font-size:19px;color:var(--gold);white-space:nowrap;}
+.hdr-logo{width:34px;height:34px;border-radius:50%;flex:0 0 auto;object-fit:cover;}
 .header-right{display:flex;align-items:center;gap:12px;}
 .month-selector{display:flex;align-items:center;gap:10px;}
 .month-selector button{background:none;border:1px solid var(--border);color:var(--muted);
@@ -426,6 +427,7 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
   .summary-grid{grid-template-columns:repeat(2,1fr);}
   header{height:auto;padding:8px 12px;flex-wrap:wrap;gap:8px;}
   header h1{font-size:16px;}
+  .hdr-logo{width:28px;height:28px;}
   .header-right{flex-wrap:wrap;justify-content:space-between;gap:8px;flex:1 1 100%;}
   .rep-full{display:none;} .rep-short{display:inline;}
   .rep-btn{padding:5px 11px;font-size:11px;}
@@ -524,9 +526,10 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
 
 <!-- ═══ HEADER ═══ -->
 <header>
-  <div style="display:flex;align-items:center;gap:12px">
+  <div style="display:flex;align-items:center;gap:10px">
     <button class="menu-toggle" onclick="toggleSidebar()" title="Menu" aria-label="Abrir menu">☰</button>
-    <h1>💰 Controle Financeiro</h1>
+    <img class="hdr-logo" src="icon-192.png" alt="Olimpo">
+    <h1>Olimpo Finanças</h1>
   </div>
   <div class="header-right">
     <button class="rep-btn" onclick="replicarMes()"><span class="rep-full">↷ Replicar para o mês seguinte</span><span class="rep-short">↷ Replicar</span></button>
