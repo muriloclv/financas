@@ -74,10 +74,20 @@ Deno.serve(async (req) => {
 
     const sb = createClient(SUPABASE_URL, SERVICE_ROLE);
 
+    // 0) Identifica o chamador pelo JWT (verify_jwt já validou o token).
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const jwt = authHeader.replace(/^Bearer\s+/i, "");
+    const { data: userData, error: uErr0 } = await sb.auth.getUser(jwt);
+    const callerId = userData?.user?.id;
+    if (uErr0 || !callerId) return json({ error: "Não autenticado." }, 401);
+
     // 1) Metadados da fatura
     const { data: fatura, error: fErr } = await sb
       .from("fin_faturas").select("*").eq("id", fatura_id).single();
     if (fErr || !fatura) return json({ error: "Fatura não encontrada." }, 404);
+
+    // 1b) Só o dono da fatura pode analisá-la.
+    if (fatura.user_id !== callerId) return json({ error: "Acesso negado." }, 403);
 
     // 2) Baixa o arquivo do bucket privado e converte para base64
     const { data: blob, error: dErr } = await sb.storage.from("faturas").download(fatura.file_path);
@@ -87,8 +97,9 @@ Deno.serve(async (req) => {
     const mime = fatura.mime || guessMime(fatura.file_name);
     const isPdf = mime.includes("pdf") || /\.pdf$/i.test(fatura.file_name || "");
 
-    // 3) Carrega o dicionário de categorias
-    const { data: cats } = await sb.from("fin_categorias").select("nome,apelidos").order("ordem");
+    // 3) Carrega o dicionário de categorias DO DONO da fatura
+    const { data: cats } = await sb.from("fin_categorias")
+      .select("nome,apelidos").eq("user_id", fatura.user_id).order("ordem");
     const categorias = cats ?? [];
     const listaNomes = categorias.map((c) => c.nome);
     const dicionario = categorias

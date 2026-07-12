@@ -919,6 +919,7 @@ const _sb = supabase.createClient(
   'https://xigdzgvingsmqzyxvpfz.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhpZ2R6Z3ZpbmdzbXF6eXh2cGZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3ODYyNTcsImV4cCI6MjA5MzM2MjI1N30.sNYkGahr8Fj_IGWjLQN-GQQ9_Y7JjQBCHx34g0ZncpQ'
 );
+let _uid = null;   // uid do usuário logado (preenchido em onAuthed); usado nos writes p/ RLS
 
 // ─── ESTADO ───────────────────────────────────────────────────────
 const state = {
@@ -958,19 +959,19 @@ const db = {
     return cfg;
   },
   saveSec(y, m, s, items) {
-    _sb.from('fin_secoes').upsert({ ano:y, mes:m, secao:s, items }, { onConflict:'ano,mes,secao' })
+    _sb.from('fin_secoes').upsert({ user_id:_uid, ano:y, mes:m, secao:s, items }, { onConflict:'user_id,ano,mes,secao' })
       .then(({error}) => { if (error) console.error('Erro ao salvar seção:', error); });
   },
   saveCampos(y, m, campos) {
-    _sb.from('fin_campos').upsert({ ano:y, mes:m, ...campos }, { onConflict:'ano,mes' })
+    _sb.from('fin_campos').upsert({ user_id:_uid, ano:y, mes:m, ...campos }, { onConflict:'user_id,ano,mes' })
       .then(({error}) => { if (error) console.error('Erro ao salvar campos:', error); });
   },
   saveCards(y, m, cards) {
-    _sb.from('fin_cards').upsert({ ano:y, mes:m, cards }, { onConflict:'ano,mes' })
+    _sb.from('fin_cards').upsert({ user_id:_uid, ano:y, mes:m, cards }, { onConflict:'user_id,ano,mes' })
       .then(({error}) => { if (error) console.error('Erro ao salvar cards:', error); });
   },
   saveConfig(key, value) {
-    _sb.from('fin_config').upsert({ key, value }, { onConflict:'key' })
+    _sb.from('fin_config').upsert({ user_id:_uid, key, value }, { onConflict:'user_id,key' })
       .then(({error}) => { if (error) console.error('Erro ao salvar config:', error); });
   },
 };
@@ -1499,11 +1500,11 @@ async function uploadFatura() {
   btn.disabled = true;
   setMsg('Enviando…', 'var(--muted)');
   const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-  const path = `${cY}/${cM}/${Date.now()}_${safe}`;
+  const path = `${_uid}/${cY}/${cM}/${Date.now()}_${safe}`;
   const up = await _sb.storage.from('faturas').upload(path, file, { upsert:false });
   if (up.error) { btn.disabled = false; setMsg('Erro no upload: ' + esc(up.error.message), 'var(--red)'); return; }
   const ins = await _sb.from('fin_faturas').insert({
-    ano: cY, mes: cM, cartao, file_path: path,
+    user_id: _uid, ano: cY, mes: cM, cartao, file_path: path,
     file_name: file.name, mime: file.type || null, tamanho: file.size
   });
   if (ins.error) {
@@ -1721,7 +1722,7 @@ async function addApelido(cat, apelido) {
   if (!row) { row = { nome: cat, apelidos: [], ordem: 50 }; _catDict.push(row); }
   const exists = (row.apelidos || []).some(x => String(x).toLowerCase() === ap.toLowerCase());
   if (!exists) row.apelidos = [...(row.apelidos || []), ap];
-  await _sb.from('fin_categorias').upsert({ nome: row.nome, apelidos: row.apelidos, ordem: row.ordem ?? 50 });
+  await _sb.from('fin_categorias').upsert({ user_id:_uid, nome: row.nome, apelidos: row.apelidos, ordem: row.ordem ?? 50 }, { onConflict:'user_id,nome' });
 }
 
 async function confirmarEstabIdx(n) {
@@ -1780,13 +1781,13 @@ async function addApelidoUI(ci, input) {
   if (!(c.apelidos || []).some(x => String(x).toLowerCase() === v.toLowerCase())) {
     c.apelidos = [...(c.apelidos || []), v];
   }
-  await _sb.from('fin_categorias').upsert({ nome: c.nome, apelidos: c.apelidos, ordem: c.ordem ?? 50 });
+  await _sb.from('fin_categorias').upsert({ user_id:_uid, nome: c.nome, apelidos: c.apelidos, ordem: c.ordem ?? 50 }, { onConflict:'user_id,nome' });
   renderCatEditor();
 }
 async function removeApelidoUI(ci, ai) {
   const c = _catDict[ci]; if (!c) return;
   c.apelidos.splice(ai, 1);
-  await _sb.from('fin_categorias').upsert({ nome: c.nome, apelidos: c.apelidos, ordem: c.ordem ?? 50 });
+  await _sb.from('fin_categorias').upsert({ user_id:_uid, nome: c.nome, apelidos: c.apelidos, ordem: c.ordem ?? 50 }, { onConflict:'user_id,nome' });
   renderCatEditor();
 }
 async function delCategoriaUI(ci) {
@@ -1803,7 +1804,7 @@ async function addCategoria() {
   const nums = (_catDict || []).map(c => c.ordem ?? 0).filter(o => o < 99);
   const ordem = (nums.length ? Math.max(...nums) : 0) + 1;
   const row = { nome, apelidos: [], ordem };
-  const { error } = await _sb.from('fin_categorias').upsert(row);
+  const { error } = await _sb.from('fin_categorias').upsert({ user_id:_uid, ...row }, { onConflict:'user_id,nome' });
   if (error) { toast('Erro ao criar categoria: ' + error.message); return; }
   _catDict.push(row);
   el.value = '';
@@ -2076,6 +2077,7 @@ async function doLogout() {
 async function onAuthed() {
   const { data } = await _sb.auth.getUser();
   const user = data?.user;
+  _uid = user?.id || null;
   const uname = user?.user_metadata?.username || emailToUser(user?.email);
   const hu = document.getElementById('hdr-user'); if (hu) hu.textContent = '👤 ' + uname;
   document.getElementById('login-btn').disabled = false;

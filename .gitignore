@@ -1,0 +1,5 @@
+# Config local de ferramentas (MCP) — não versionar
+.mcp.json
+
+# Backups locais / snapshots de rollback — não versionar (ficam só na sua máquina)
+backup/
