@@ -241,7 +241,8 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
 .content{flex:1;min-width:0;padding:22px 18px;max-width:1140px;margin:0 auto;}
 .tab-panel{display:none;}
 .tab-panel.active{display:block;}
-.sidebar-overlay{display:none;position:fixed;inset:60px 0 0 0;background:rgba(0,0,0,.5);z-index:150;}
+.sidebar-overlay{display:none;position:fixed;top:var(--hdr-h,60px);left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:150;}
+.rep-short{display:none;}
 
 /* upload de faturas */
 .fat-upload{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;
@@ -414,7 +415,7 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
 
 @media(max-width:860px){
   .menu-toggle{display:inline-flex;}
-  .sidebar{position:fixed;top:60px;left:0;bottom:0;height:calc(100vh - 60px);z-index:160;
+  .sidebar{position:fixed;top:var(--hdr-h,60px);left:0;bottom:0;height:calc(100vh - var(--hdr-h,60px));z-index:160;
     transform:translateX(-100%);transition:transform .22s ease;overflow-y:auto;min-height:auto;}
   .sidebar.open{transform:translateX(0);box-shadow:4px 0 20px rgba(0,0,0,.4);}
   .sidebar-overlay.open{display:block;}
@@ -423,8 +424,12 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
 
 @media(max-width:760px){
   .summary-grid{grid-template-columns:repeat(2,1fr);}
-  header{height:auto;padding:10px 14px;flex-wrap:wrap;}
-  .header-right{flex-wrap:wrap;justify-content:flex-end;gap:8px;}
+  header{height:auto;padding:8px 12px;flex-wrap:wrap;gap:8px;}
+  header h1{font-size:16px;}
+  .header-right{flex-wrap:wrap;justify-content:space-between;gap:8px;flex:1 1 100%;}
+  .rep-full{display:none;} .rep-short{display:inline;}
+  .rep-btn{padding:5px 11px;font-size:11px;}
+  #hdr-user{max-width:38vw;overflow:hidden;text-overflow:ellipsis;}
 }
 
 /* ─── Tabelas roláveis em qualquer tela (no desktop cabem, não aparece barra) ─── */
@@ -442,13 +447,17 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
   /* Campos lado a lado dos modais empilham */
   .mrow{flex-direction:column;gap:0;}
   .modal{padding:22px 18px 18px;}
-  /* Resumo em 2 colunas continua; em telas bem estreitas, 1 coluna */
   .fat-upload .cbtn,.add-form .cbtn{width:100%;}
+  /* Resumo: 2 colunas compactas (em vez de 1 coluna gigante) */
+  .summary-grid{grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px;}
+  .summary-card,.add-card-btn{padding:12px 13px;min-height:72px;}
+  .card-value,.edit-inline{font-size:17px;}
+  .card-label{font-size:10px;letter-spacing:.06em;}
 }
 @media(max-width:420px){
-  .summary-grid{grid-template-columns:1fr;}
-  #month-label{min-width:96px;font-size:13px;}
+  #month-label{min-width:92px;font-size:13px;}
   .month-selector{gap:6px;}
+  .month-selector button{width:26px;height:26px;}
 }
 </style>
 </head>
@@ -520,7 +529,7 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
     <h1>💰 Controle Financeiro</h1>
   </div>
   <div class="header-right">
-    <button class="rep-btn" onclick="replicarMes()">↷ Replicar para o mês seguinte</button>
+    <button class="rep-btn" onclick="replicarMes()"><span class="rep-full">↷ Replicar para o mês seguinte</span><span class="rep-short">↷ Replicar</span></button>
     <div class="month-selector">
       <button onclick="changeMonth(-1)">‹</button>
       <span id="month-label"></span>
@@ -2131,6 +2140,18 @@ async function onAuthed() {
   document.getElementById('init-year').value  = now.getFullYear();
   document.getElementById('init-modal-bg').classList.add('open');
 }
+
+// Mantém o menu lateral (mobile) alinhado à altura REAL do header, que varia
+// conforme ele quebra em várias linhas no celular. Corrige itens do menu escondidos.
+(function() {
+  const hdr = document.querySelector('header');
+  if (!hdr) return;
+  const setH = () => document.documentElement.style.setProperty('--hdr-h', hdr.offsetHeight + 'px');
+  setH();
+  if (window.ResizeObserver) new ResizeObserver(setH).observe(hdr);
+  window.addEventListener('resize', setH);
+  window.addEventListener('orientationchange', setH);
+})();
 
 // ─── INIT ────────────────────────────────────────────────────────
 (async function() {
