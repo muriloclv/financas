@@ -2,8 +2,17 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Controle Financeiro</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Olimpo Finanças</title>
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0d0f14">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Olimpo">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
@@ -417,6 +426,30 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
   header{height:auto;padding:10px 14px;flex-wrap:wrap;}
   .header-right{flex-wrap:wrap;justify-content:flex-end;gap:8px;}
 }
+
+/* ─── Tabelas roláveis em qualquer tela (no desktop cabem, não aparece barra) ─── */
+.tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+/* Modais nunca estouram a altura da tela (vale em todos os tamanhos) */
+.modal{max-height:92vh;overflow-y:auto;}
+
+/* ─── Polimento para celular (só telas pequenas; desktop intacto) ─── */
+@media(max-width:640px){
+  .content{padding:14px 12px;}
+  /* Tabelas: mantêm colunas legíveis e o usuário arrasta na horizontal */
+  .tbl-scroll table{min-width:540px;}
+  th{padding:8px 10px;}
+  td{padding:9px 10px;}
+  /* Campos lado a lado dos modais empilham */
+  .mrow{flex-direction:column;gap:0;}
+  .modal{padding:22px 18px 18px;}
+  /* Resumo em 2 colunas continua; em telas bem estreitas, 1 coluna */
+  .fat-upload .cbtn,.add-form .cbtn{width:100%;}
+}
+@media(max-width:420px){
+  .summary-grid{grid-template-columns:1fr;}
+  #month-label{min-width:96px;font-size:13px;}
+  .month-selector{gap:6px;}
+}
 </style>
 </head>
 <body>
@@ -606,6 +639,7 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
         </div>
         <button class="cbtn" onclick="addItem('fixas')">Adicionar</button>
       </div>
+      <div class="tbl-scroll">
       <table>
         <thead><tr>
           <th>Descrição</th>
@@ -616,6 +650,7 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
         </tr></thead>
         <tbody id="tbody-fixas"></tbody>
       </table>
+      </div>
     </div>
 
     <!-- ═══ GRÁFICO (aba Gastos Fixos) ═══ -->
@@ -661,6 +696,7 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
         </div>
         <button class="cbtn" onclick="addItem('cartao')">OK</button>
       </div>
+      <div class="tbl-scroll">
       <table>
         <thead><tr>
           <th>Descrição</th>
@@ -671,6 +707,7 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
         </tr></thead>
         <tbody id="tbody-cartao"></tbody>
       </table>
+      </div>
     </div>
 
   </div><!-- /panel-cartao -->
@@ -709,6 +746,7 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
         </div>
         <button class="cbtn" onclick="addItem('ia')">OK</button>
       </div>
+      <div class="tbl-scroll">
       <table>
         <thead><tr>
           <th>Descrição</th>
@@ -719,6 +757,7 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
         </tr></thead>
         <tbody id="tbody-ia"></tbody>
       </table>
+      </div>
     </div>
 
   </div><!-- /panel-ia -->
@@ -744,6 +783,7 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
         <div class="fld" style="max-width:150px"><label>Data</label><input id="iv-data" type="date"></div>
         <button class="cbtn" onclick="addInvestimento()">OK</button>
       </div>
+      <div class="tbl-scroll">
       <table>
         <thead><tr>
           <th>Tipo</th>
@@ -753,6 +793,7 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
         </tr></thead>
         <tbody id="tbody-investimentos"></tbody>
       </table>
+      </div>
     </div>
 
   </div><!-- /panel-investimentos -->
@@ -781,6 +822,7 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
         <button class="cbtn" id="fat-upload-btn" onclick="uploadFatura()">Enviar fatura</button>
       </div>
       <div id="fat-status"></div>
+      <div class="tbl-scroll">
       <table>
         <thead><tr>
           <th>Cartão</th>
@@ -791,6 +833,7 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
         </tr></thead>
         <tbody id="tbody-faturas"></tbody>
       </table>
+      </div>
       <div id="fat-analise" style="padding:0 16px 16px"></div>
     </div>
 
@@ -2095,6 +2138,14 @@ async function onAuthed() {
   if (data?.session) { await onAuthed(); }          // já logado: pula o login
   else { document.getElementById('login-modal-bg').classList.add('open'); }
 })();
+</script>
+<!-- PWA: registra o service worker (só em contexto seguro/HTTPS; não faz nada se aberto via file://) -->
+<script>
+if ('serviceWorker' in navigator && window.isSecureContext) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js').catch(() => {});
+  });
+}
 </script>
 </body>
 </html>
