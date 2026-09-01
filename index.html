@@ -198,6 +198,61 @@ tr.paid .parc-badge{opacity:.55;}
 .parc-chk-inner{display:flex;align-items:center;gap:6px;height:34px;}
 .parc-chk-inner input[type=checkbox]{accent-color:var(--gold);width:15px;height:15px;cursor:pointer;}
 .parc-chk-inner span{font-size:13px;color:var(--muted);}
+/* Modal Replicar — seleção de seções */
+.rep-list{display:flex;flex-direction:column;gap:6px;}
+.rep-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:9px;
+  border:1px solid var(--border);background:var(--surface2);transition:border-color .15s;}
+.rep-row:hover{border-color:var(--gold);}
+.rep-row.on{border-color:var(--gold);background:var(--gold-soft);}
+.rep-row.dis{opacity:.4;}
+.rep-row.dis:hover{border-color:var(--border);}
+.rep-main{display:flex;align-items:flex-start;gap:9px;flex:1;min-width:0;cursor:pointer;}
+.rep-row.dis .rep-main{cursor:default;}
+.rep-main input[type=checkbox]{accent-color:var(--gold);width:15px;height:15px;cursor:pointer;
+  margin-top:2px;flex:none;}
+.rep-txt{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.rep-nome{font-size:13px;color:var(--text);line-height:1.3;}
+.rep-hint{font-size:11px;color:var(--muted);line-height:1.4;align-self:flex-start;}
+.rep-hint.warn{color:var(--gold);}
+.rep-hint.tip{cursor:pointer;border-bottom:1px dotted currentColor;}
+.tip-ico{opacity:.75;font-size:11px;}
+.rep-pick{background:none;border:1px solid var(--border);color:var(--muted);font-size:11px;
+  padding:5px 9px;border-radius:7px;cursor:pointer;font-family:inherit;flex:none;white-space:nowrap;}
+.rep-pick:hover{border-color:var(--gold);color:var(--gold);}
+.rep-sep{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:15px 0 7px;}
+.rep-sep:first-of-type{margin-top:4px;}
+.rep-all{background:none;border:none;color:var(--gold);font-size:11px;cursor:pointer;padding:0;
+  font-family:inherit;text-transform:none;letter-spacing:0;text-decoration:underline;}
+
+/* Tooltip dos avisos (quais itens serão mantidos/apagados) */
+#rep-tip{position:fixed;z-index:700;max-width:min(310px, calc(100vw - 24px));
+  background:var(--bg);border:1px solid var(--gold);border-radius:9px;padding:9px 11px;
+  font-size:11px;color:var(--text);line-height:1.6;box-shadow:0 8px 26px rgba(0,0,0,.55);
+  display:none;}
+#rep-tip.show{display:block;}
+#rep-tip b{color:var(--gold);font-weight:600;}
+#rep-tip .tip-of{color:var(--muted);}
+#rep-tip .tip-x{color:var(--red);}
+#rep-tip .tip-v{color:var(--green);}
+
+/* Modal Escolher itens (por seção) */
+#pick-modal-bg{z-index:520;}
+.pick-list{display:flex;flex-direction:column;gap:2px;max-height:230px;overflow-y:auto;
+  -webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+  border:1px solid var(--border);border-radius:9px;padding:5px;background:var(--bg);}
+.pick-it{display:flex;align-items:center;gap:8px;padding:6px 7px;border-radius:6px;cursor:pointer;}
+.pick-it:hover{background:var(--surface2);}
+.pick-it input{accent-color:var(--gold);width:14px;height:14px;cursor:pointer;flex:none;}
+.pick-nome{flex:1;font-size:12.5px;color:var(--text);overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap;}
+.pick-val{font-size:12px;color:var(--muted);flex:none;}
+.pick-flag{font-size:10px;color:var(--gold);background:var(--gold-soft);
+  padding:2px 6px;border-radius:5px;flex:none;}
+.pick-empty{font-size:11px;color:var(--muted);padding:9px;text-align:center;}
+.pick-res{font-size:12px;color:var(--muted);background:var(--surface2);
+  border:1px solid var(--border);border-radius:8px;padding:9px 11px;margin-top:13px;line-height:1.5;}
+.pick-res b{color:var(--gold);font-weight:600;}
 .parc-fields{display:none;gap:6px;}
 .parc-fields.show{display:flex;}
 .parc-fields .fld{flex:0 0 62px;min-width:62px;}
@@ -456,6 +511,22 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
   .card-value,.edit-inline{font-size:17px;}
   .card-label{font-size:10px;letter-spacing:.06em;}
 }
+/* ─── Replicar: alvos de toque no celular ─── */
+@media(max-width:640px){
+  .rep-row{padding:11px 12px;gap:10px;}
+  .rep-main input[type=checkbox]{width:18px;height:18px;}
+  .rep-nome{font-size:13.5px;}
+  .rep-hint{font-size:11.5px;}
+  .rep-pick{padding:9px 13px;font-size:12px;}
+  .rep-all{font-size:12px;padding:4px 0;}
+  .pick-it{padding:10px 8px;gap:10px;}
+  .pick-it input{width:18px;height:18px;}
+  .pick-nome{font-size:13px;}
+  .pick-val{font-size:12.5px;}
+  .pick-list{max-height:32vh;}
+  .pick-res{font-size:12.5px;}
+  #rep-tip{font-size:12px;padding:11px 13px;}
+}
 @media(max-width:420px){
   #month-label{min-width:92px;font-size:13px;}
   .month-selector{gap:6px;}
@@ -532,7 +603,7 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
     <h1>Olimpo Finanças</h1>
   </div>
   <div class="header-right">
-    <button class="rep-btn" onclick="replicarMes()"><span class="rep-full">↷ Replicar para o mês seguinte</span><span class="rep-short">↷ Replicar</span></button>
+    <button class="rep-btn" onclick="openRepModal()"><span class="rep-full">↷ Replicar para o mês seguinte</span><span class="rep-short">↷ Replicar</span></button>
     <div class="month-selector">
       <button onclick="changeMonth(-1)">‹</button>
       <span id="month-label"></span>
@@ -961,6 +1032,57 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
   </div>
 </div>
 
+<div class="modal-bg" id="rep-modal-bg">
+  <div class="modal">
+    <h3>Replicar para o mês seguinte</h3>
+    <p class="modal-desc" id="rep-desc">—</p>
+
+    <div class="rep-sep">
+      <span>Seções</span>
+      <button class="rep-all" type="button" onclick="repToggleAll()" id="rep-all-btn">Desmarcar todas</button>
+    </div>
+    <div class="rep-list" id="rep-secoes"></div>
+
+    <div class="rep-sep"><span>Outros</span></div>
+    <div class="rep-list" id="rep-extras"></div>
+
+    <p class="modal-err" id="rep-msg" style="display:none"></p>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeRepModal()">Cancelar</button>
+      <button class="btn-ok" onclick="confirmarReplicar()" id="rep-ok">Replicar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="pick-modal-bg">
+  <div class="modal">
+    <h3 id="pick-title">Escolher itens</h3>
+    <p class="modal-desc" id="pick-desc">—</p>
+
+    <div class="rep-sep">
+      <span>O que replicar</span>
+      <button class="rep-all" type="button" onclick="pickAll('src')" id="pick-src-btn">Desmarcar todos</button>
+    </div>
+    <div class="pick-list" id="pick-src"></div>
+
+    <div id="pick-dst-wrap">
+      <div class="rep-sep">
+        <span id="pick-dst-lbl">Já existe no destino — manter?</span>
+        <button class="rep-all" type="button" onclick="pickAll('dst')" id="pick-dst-btn">Marcar todos</button>
+      </div>
+      <div class="pick-list" id="pick-dst"></div>
+    </div>
+
+    <div class="pick-res" id="pick-res">—</div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closePickModal()">Cancelar</button>
+      <button class="btn-ok" onclick="pickConfirm()">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<div id="rep-tip"></div>
+
 <script>
 // ─── CONSTANTES & ESTADO ──────────────────────────────────────────
 const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
@@ -1304,38 +1426,436 @@ function toggleForm(id) {
   if (f.classList.contains('open')) f.querySelector('input').focus();
 }
 
-// ─── REPLICAR MÊS ────────────────────────────────────────────────
-function replicarMes() {
-  const nm = cM===11 ? 0    : cM+1;
-  const ny = cM===11 ? cY+1 : cY;
-  if (!confirm(
-    `Replicar todos os dados de ${MONTHS[cM]} ${cY} para ${MONTHS[nm]} ${ny}?\n\n` +
-    `• Itens parcelados terão a parcela incrementada.\n` +
-    `• Itens com parcela concluída (ex: 10/10) serão descartados.`
-  )) return;
+// ─── REPLICAR MÊS ──────────────────────────────
+const REP_SECOES = [
+  { k:'fixas',         cfg:'sn_fixas',  def:'Gastos Fixos' },
+  { k:'cartao',        cfg:'sn_cartao', def:'Contas parceladas e fixas no cartão' },
+  { k:'ia',            cfg:'sn_ia',     def:'Gastos com IA' },
+  { k:'investimentos', cfg:null,        def:'Investimentos' },
+];
+let repDest = null;   // { y, m, secoes, campos, cards } lido do mês de destino
+let repSel  = {};     // { [secao]: { src:Set<idx origem>, dst:Set<idx destino a manter> } }
+let pickSec = null, pickTmp = null;
 
-  ['fixas','cartao','ia','investimentos'].forEach(s => {
-    const curr = loadSec(s);
-    const next = [];
-    curr.forEach(item => {
-      if (item.parcela && item.parcela.ativo) {
-        if (item.parcela.atual >= item.parcela.total) return;
-        next.push({ ...item, id:Date.now()+Math.random(), paid:false,
-          parcela: { ...item.parcela, atual: item.parcela.atual+1 } });
-      } else {
-        next.push({ ...item, id:Date.now()+Math.random(), paid:false });
-      }
+function repNomeSec(s) {
+  if (s === 'cards') return 'Cards personalizados';
+  const sec = REP_SECOES.find(x => x.k === s);
+  return sec.cfg ? cfgGet(sec.cfg, sec.def) : sec.def;
+}
+// Card guarda o valor já formatado ('R$ 1.500,00'); item de seção guarda número.
+function repVal(s, it) { return s === 'cards' ? (it.value || '—') : fmt(it.value); }
+function repNorm(n) { return String(n || '').trim().toLowerCase(); }
+
+// Lê o mês de destino direto do banco (só leitura, nada é gravado aqui).
+async function repPeek(y, m) {
+  const [secRes, camposRes, cardsRes] = await Promise.all([
+    _sb.from('fin_secoes').select('secao,items').eq('ano',y).eq('mes',m),
+    _sb.from('fin_campos').select('salario,proventos,saldo').eq('ano',y).eq('mes',m).maybeSingle(),
+    _sb.from('fin_cards').select('cards').eq('ano',y).eq('mes',m).maybeSingle(),
+  ]);
+  if (secRes.error || camposRes.error || cardsRes.error)
+    throw (secRes.error || camposRes.error || cardsRes.error);
+  const secoes = { fixas:[], cartao:[], ia:[], investimentos:[] };
+  (secRes.data||[]).forEach(r => { secoes[r.secao] = r.items || []; });
+  return { y, m, secoes, campos: camposRes.data || null, cards: cardsRes.data?.cards || [] };
+}
+
+// Itens da origem que realmente passam (parcela concluída é descartada).
+function repEleg(s) {
+  if (s === 'cards') return loadCC();
+  return loadSec(s).filter(it => !(it.parcela && it.parcela.ativo && it.parcela.atual >= it.parcela.total));
+}
+function repDst(s) {
+  if (!repDest) return [];
+  return s === 'cards' ? repDest.cards : (repDest.secoes[s] || []);
+}
+
+// Seleção default: tudo da origem vai; do destino, mantém o que NÃO duplica um item da origem.
+function repSelOf(s) {
+  if (!repSel[s]) {
+    const eleg = repEleg(s), dst = repDst(s);
+    const nomes = new Set(eleg.map(i => repNorm(i.name)));
+    repSel[s] = {
+      src: new Set(eleg.map((_, i) => i)),
+      dst: new Set(dst.map((it, i) => (nomes.has(repNorm(it.name)) ? -1 : i)).filter(i => i >= 0)),
+    };
+  }
+  return repSel[s];
+}
+
+// Como o item da origem fica depois de replicado.
+function repTransf(s, item) {
+  if (s === 'cards') return { ...item };
+  return {
+    ...item,
+    id: Date.now() + Math.random(),
+    paid: false,
+    parcela: (item.parcela && item.parcela.ativo)
+      ? { ...item.parcela, atual: item.parcela.atual + 1 }
+      : item.parcela,
+  };
+}
+
+// Lista final da seção: mantidos do destino primeiro, replicados depois.
+function repResultado(s) {
+  const sel = repSelOf(s);
+  const mantidos  = repDst(s).filter((_, i) => sel.dst.has(i));
+  const chegando  = repEleg(s).filter((_, i) => sel.src.has(i)).map(it => repTransf(s, it));
+  return { mantidos, chegando, itens: [...mantidos, ...chegando] };
+}
+
+// ─── Modal 1: quais seções replicar ──────────────────────────────
+function repHint(s) {
+  const eleg = repEleg(s), dst = repDst(s), sel = repSelOf(s);
+  const nSrc = sel.src.size, nEleg = eleg.length;
+  const nKeep = sel.dst.size;
+
+  if (!nEleg && !dst.length) return { txt:'Nada a replicar', warn:false, inerte:true, tip:false };
+
+  // Um item do destino que sai mas tem homônimo chegando é SUBSTITUÍDO, não perdido.
+  const chegando = new Set(eleg.filter((_, i) => sel.src.has(i)).map(it => repNorm(it.name)));
+  let nSub = 0, nDel = 0;
+  dst.forEach((it, i) => {
+    if (sel.dst.has(i)) return;
+    if (chegando.has(repNorm(it.name))) nSub++; else nDel++;
+  });
+
+  if (!nSrc && !nSub && !nDel)
+    return { txt: (nEleg ? 'Nenhum item marcado' : 'Origem vazia') +
+                  (dst.length ? ' — destino intacto (' + dst.length + ')' : ''),
+             warn:false, inerte:false, tip:true };
+
+  let txt = !nEleg ? 'Origem vazia'
+          : nSrc === nEleg ? nSrc + (nSrc === 1 ? ' item' : ' itens')
+          : nSrc + ' de ' + nEleg + ' itens';
+
+  if (dst.length) {
+    const ps = [];
+    if (nKeep) ps.push('mantém ' + nKeep);
+    if (nSub)  ps.push('substitui ' + nSub);
+    if (nDel)  ps.push('apaga ' + nDel);
+    txt += ' — destino: ' + ps.join(', ') + ' → fica ' + (nSrc + nKeep);
+  }
+  return { txt, warn: nDel > 0, inerte:false, tip:true };
+}
+
+function repRow(id, nome, hint, pickavel) {
+  return '<div class="rep-row' + (hint.inerte ? ' dis' : '') + '" id="rep-r-' + id + '">' +
+    '<label class="rep-main" for="rep-c-' + id + '">' +
+      '<input type="checkbox" id="rep-c-' + id + '" value="' + id + '" onchange="repSync()"' +
+        (hint.inerte ? ' disabled' : '') + '>' +
+      '<span class="rep-txt">' +
+        '<span class="rep-nome">' + esc(nome) + '</span>' +
+        '<span class="rep-hint' + (hint.warn ? ' warn' : '') + (hint.tip ? ' tip' : '') + '"' +
+          (hint.tip ? ' data-tipsec="' + id + '"' : '') + '>' + hint.txt +
+          (hint.tip ? ' <span class="tip-ico">\u24d8</span>' : '') + '</span>' +
+      '</span>' +
+    '</label>' +
+    (pickavel && !hint.inerte
+      ? '<button class="rep-pick" type="button" onclick="openPickModal(\'' + id + '\')">Escolher</button>'
+      : '') +
+  '</div>';
+}
+
+function repRenderSecoes() {
+  const marcados = new Set(
+    [...document.querySelectorAll('#rep-secoes input')].filter(b => b.checked).map(b => b.value));
+  document.getElementById('rep-secoes').innerHTML =
+    REP_SECOES.map(sec => repRow(sec.k, repNomeSec(sec.k), repHint(sec.k), true)).join('');
+  marcados.forEach(k => {
+    const b = document.getElementById('rep-c-' + k);
+    if (b && !b.disabled) b.checked = true;
+  });
+}
+
+function repRenderExtras() {
+  const marcados = new Set(
+    [...document.querySelectorAll('#rep-extras input')].filter(b => b.checked).map(b => b.value));
+  const temCampos = !!repDest.campos;
+  document.getElementById('rep-extras').innerHTML =
+    repRow('cards', repNomeSec('cards'), repHint('cards'), true) +
+    repRow('campos', 'Salário e Demais Proventos', {
+      txt: 'Saldo em Conta vai zerado' +
+           (temCampos ? ' — substitui os valores já salvos no destino' : ''),
+      warn: temCampos, inerte:false, tip:false,
+    }, false);
+  marcados.forEach(k => {
+    const b = document.getElementById('rep-c-' + k);
+    if (b && !b.disabled) b.checked = true;
+  });
+}
+
+async function openRepModal() {
+  const nm = cM === 11 ? 0     : cM + 1;
+  const ny = cM === 11 ? cY + 1 : cY;
+
+  const bg = document.getElementById('rep-modal-bg');
+  document.getElementById('rep-desc').textContent =
+    'De ' + MONTHS[cM] + ' ' + cY + ' para ' + MONTHS[nm] + ' ' + ny + '. Escolha o que replicar.';
+  document.getElementById('rep-secoes').innerHTML = '<div class="rep-hint">Carregando destino…</div>';
+  document.getElementById('rep-extras').innerHTML = '';
+  document.getElementById('rep-msg').style.display = 'none';
+  repDest = null; repSel = {};
+  bg.classList.add('open');
+
+  let dest;
+  try {
+    dest = await repPeek(ny, nm);
+  } catch (e) {
+    console.error('Erro ao ler o mês de destino:', e);
+    document.getElementById('rep-secoes').innerHTML =
+      '<div class="rep-hint warn">Não foi possível ler o mês de destino. Feche e tente de novo.</div>';
+    return;
+  }
+  if (!bg.classList.contains('open')) return;   // fechou enquanto carregava
+  repDest = dest;
+
+  repRenderSecoes();
+
+  repRenderExtras();
+  repSync();
+}
+
+function closeRepModal() {
+  document.getElementById('rep-modal-bg').classList.remove('open');
+  repTipHide();
+  repDest = null; repSel = {};
+}
+
+function repBoxes() {
+  return [...document.querySelectorAll('#rep-secoes input, #rep-extras input')];
+}
+
+function repSync() {
+  const bs = repBoxes();
+  bs.forEach(b => b.closest('.rep-row').classList.toggle('on', b.checked));
+  const ativos = bs.filter(b => !b.disabled);
+  const n = ativos.filter(b => b.checked).length;
+  document.getElementById('rep-all-btn').textContent =
+    (n > 0 && n === ativos.length) ? 'Desmarcar todas' : 'Marcar todas';
+  const ok = document.getElementById('rep-ok');
+  ok.disabled = n === 0;
+  ok.style.opacity = n === 0 ? .45 : 1;
+  ok.textContent = n === 0 ? 'Replicar' : 'Replicar (' + n + ')';
+}
+
+function repToggleAll() {
+  const ativos = repBoxes().filter(b => !b.disabled);
+  const marcar = !(ativos.length > 0 && ativos.every(b => b.checked));
+  ativos.forEach(b => { b.checked = marcar; });
+  repSync();
+}
+
+// ─── Tooltip: quais itens serão mantidos / apagados / deixados de fora ──
+function repTipHTML(s) {
+  const eleg = repEleg(s), dst = repDst(s), sel = repSelOf(s);
+  const LIM = 7;
+  const linhas = [];
+
+  const fora = eleg.filter((_, i) => !sel.src.has(i));
+  if (fora.length) {
+    linhas.push('<b>Fora da replicação (' + fora.length + ')</b>');
+    fora.slice(0, LIM).forEach(it =>
+      linhas.push('<span class="tip-of">— ' + esc(it.name) + ' · ' + repVal(s, it) + '</span>'));
+    if (fora.length > LIM) linhas.push('<span class="tip-of">+ ' + (fora.length - LIM) + ' mais</span>');
+  }
+
+  if (dst.length) {
+    if (linhas.length) linhas.push('<span class="tip-of">&nbsp;</span>');
+    linhas.push('<b>Já em ' + MONTHS[repDest.m] + ' (' + dst.length + ')</b>');
+    const chegando = new Set(eleg.filter((_, i) => sel.src.has(i)).map(it => repNorm(it.name)));
+    dst.slice(0, LIM).forEach((it, i) => {
+      const manter = sel.dst.has(i);
+      const sub = !manter && chegando.has(repNorm(it.name));
+      linhas.push('<span class="' + (manter ? 'tip-v' : sub ? 'tip-of' : 'tip-x') + '">' +
+        (manter ? '✓' : sub ? '⟳' : '✕') + ' ' + esc(it.name) + ' · ' + repVal(s, it) +
+        (manter ? '' : sub ? ' (substituído)' : ' (apagado)') + '</span>');
     });
-    db.saveSec(ny, nm, s, next);
+    if (dst.length > LIM) linhas.push('<span class="tip-of">+ ' + (dst.length - LIM) + ' mais</span>');
+  }
+
+  linhas.push('<span class="tip-of">&nbsp;</span>');
+  linhas.push('<span class="tip-of">' + (REP_TEM_HOVER ? 'Clique' : 'Toque') +
+              ' em "Escolher" para ajustar.</span>');
+  return linhas.join('<br>');
+}
+
+let repTipDe = null;
+function repTipShow(el) {
+  const s = el.dataset.tipsec;
+  if (!s || !repDest) return;
+  repTipDe = el;
+  const tip = document.getElementById('rep-tip');
+  tip.innerHTML = repTipHTML(s);
+  tip.classList.add('show');
+  const r = el.getBoundingClientRect(), t = tip.getBoundingClientRect();
+  let x = r.left, y = r.bottom + 7;
+  if (x + t.width  > innerWidth  - 10) x = Math.max(10, innerWidth - t.width - 10);
+  if (y + t.height > innerHeight - 10) y = Math.max(10, r.top - t.height - 7);
+  tip.style.left = x + 'px';
+  tip.style.top  = y + 'px';
+}
+function repTipHide() {
+  document.getElementById('rep-tip').classList.remove('show');
+  repTipDe = null;
+}
+function repTipToggle(el) {
+  if (repTipDe === el && document.getElementById('rep-tip').classList.contains('show')) repTipHide();
+  else repTipShow(el);
+}
+
+// Desktop: passar o mouse. Celular (sem hover): um toque abre, outro fecha.
+const REP_TEM_HOVER = window.matchMedia('(hover: hover)').matches;
+if (REP_TEM_HOVER) {
+  document.addEventListener('mouseover', e => {
+    const el = e.target.closest?.('[data-tipsec]');
+    if (el) repTipShow(el); else repTipHide();
+  });
+}
+// O clique vale nos dois: no toque é o gatilho; no desktop evita que clicar
+// no aviso marque a seção sem querer (o hint mora dentro do <label>).
+document.addEventListener('click', e => {
+  const el = e.target.closest?.('[data-tipsec]');
+  if (el) { e.preventDefault(); e.stopPropagation(); repTipToggle(el); }
+  else repTipHide();
+}, true);
+
+// ─── Modal 2: escolher itens da seção ────────────────────────────
+function openPickModal(s) {
+  if (!repDest) return;
+  pickSec = s;
+  const base = repSelOf(s);
+  pickTmp = { src: new Set(base.src), dst: new Set(base.dst) };
+  repTipHide();
+
+  document.getElementById('pick-title').textContent = repNomeSec(s);
+  document.getElementById('pick-desc').textContent =
+    MONTHS[cM] + ' ' + cY + ' → ' + MONTHS[repDest.m] + ' ' + repDest.y;
+  document.getElementById('pick-dst-lbl').textContent =
+    'Já existe em ' + MONTHS[repDest.m] + ' — manter?';
+  document.getElementById('pick-modal-bg').classList.add('open');
+  pickRender();
+}
+
+function pickItemHTML(lado, i, it, novaParc, flag) {
+  return '<label class="pick-it">' +
+    '<input type="checkbox" data-lado="' + lado + '" data-i="' + i + '"' +
+      (pickTmp[lado].has(i) ? ' checked' : '') + ' onchange="pickToggle(this)">' +
+    '<span class="pick-nome">' + esc(it.name || '(sem nome)') + '</span>' +
+    (novaParc ? '<span class="parc-badge">' + novaParc + '</span>' : '') +
+    (flag ? '<span class="pick-flag">' + flag + '</span>' : '') +
+    '<span class="pick-val">' + repVal(pickSec, it) + '</span>' +
+  '</label>';
+}
+
+function pickRender() {
+  const eleg = repEleg(pickSec), dst = repDst(pickSec);
+
+  document.getElementById('pick-src').innerHTML = eleg.length
+    ? eleg.map((it, i) => pickItemHTML('src', i, it,
+        (it.parcela && it.parcela.ativo) ? (it.parcela.atual + 1) + '/' + it.parcela.total : '',
+        '')).join('')
+    : '<div class="pick-empty">Nada nesta seção no mês de origem.</div>';
+
+  // nomes que estão CHEGANDO agora — destino com mesmo nome duplicaria
+  const chegando = new Set(eleg.filter((_, i) => pickTmp.src.has(i)).map(it => repNorm(it.name)));
+  document.getElementById('pick-dst-wrap').style.display = dst.length ? '' : 'none';
+  if (dst.length) {
+    document.getElementById('pick-dst').innerHTML = dst.map((it, i) =>
+      pickItemHTML('dst', i, it, (it.parcela && it.parcela.ativo)
+        ? it.parcela.atual + '/' + it.parcela.total : '',
+        chegando.has(repNorm(it.name)) ? 'duplicaria' : '')).join('');
+  }
+  pickSync();
+}
+
+function pickToggle(el) {
+  const lado = el.dataset.lado, i = +el.dataset.i;
+  if (el.checked) pickTmp[lado].add(i); else pickTmp[lado].delete(i);
+  if (lado === 'src') pickRender();   // reavalia os avisos de "duplicaria"
+  else pickSync();
+}
+
+function pickSync() {
+  const eleg = repEleg(pickSec), dst = repDst(pickSec);
+  const nEleg = eleg.length, nDst = dst.length;
+  const nSrc = pickTmp.src.size, nKeep = pickTmp.dst.size;
+
+  document.getElementById('pick-src-btn').textContent =
+    (nSrc === nEleg && nEleg > 0) ? 'Desmarcar todos' : 'Marcar todos';
+  document.getElementById('pick-dst-btn').textContent =
+    (nKeep === nDst && nDst > 0) ? 'Desmarcar todos' : 'Marcar todos';
+
+  // separa substituído (tem homônimo chegando) de apagado de verdade
+  const chegando = new Set(eleg.filter((_, i) => pickTmp.src.has(i)).map(it => repNorm(it.name)));
+  let nSub = 0, nDel = 0;
+  dst.forEach((it, i) => {
+    if (pickTmp.dst.has(i)) return;
+    if (chegando.has(repNorm(it.name))) nSub++; else nDel++;
   });
 
-  db.saveCampos(ny, nm, {
-    salario: state.campos.salario,
-    proventos: state.campos.proventos,
-    saldo: 'R$ 0,00',
+  const l1 = ['<b>' + nSrc + '</b> de ' + nEleg + ' replicados'];
+  if (nDst) l1.push('<b>' + nKeep + '</b> de ' + nDst + ' mantidos');
+
+  const l2 = [MONTHS[repDest.m] + ' ficará com <b>' + (nSrc + nKeep) +
+              (nSrc + nKeep === 1 ? '</b> item' : '</b> itens')];
+  if (nSub) l2.push('<b>' + nSub + '</b> substituído' + (nSub === 1 ? '' : 's') + ' por homônimo');
+  if (nDel) l2.push('<b>' + nDel + '</b> apagado' + (nDel === 1 ? '' : 's'));
+
+  document.getElementById('pick-res').innerHTML = l1.join(' · ') + '<br>' + l2.join(' · ');
+}
+
+function pickAll(lado) {
+  const total = lado === 'src' ? repEleg(pickSec).length : repDst(pickSec).length;
+  const marcar = pickTmp[lado].size !== total;
+  pickTmp[lado] = marcar ? new Set([...Array(total).keys()]) : new Set();
+  pickRender();
+}
+
+function closePickModal() {
+  document.getElementById('pick-modal-bg').classList.remove('open');
+  pickSec = null; pickTmp = null;
+}
+
+function pickConfirm() {
+  if (!pickSec || !pickTmp) return;
+  repSel[pickSec] = pickTmp;
+  const s = pickSec;
+  closePickModal();
+  if (s === 'cards') repRenderExtras(); else repRenderSecoes();
+  const b = document.getElementById('rep-c-' + s);   // ajustou os itens => quer replicar
+  if (b && !b.disabled) b.checked = true;
+  repSync();
+}
+
+// ─── Gravação ────────────────────────────────────────────────────
+function confirmarReplicar() {
+  if (!repDest) return;
+  const sel = repBoxes().filter(b => b.checked).map(b => b.value);
+  if (!sel.length) return;
+
+  const ny = repDest.y, nm = repDest.m;
+  let n = 0;
+
+  REP_SECOES.forEach(sec => {
+    if (!sel.includes(sec.k)) return;          // não marcado: destino fica intacto
+    db.saveSec(ny, nm, sec.k, repResultado(sec.k).itens);
+    n++;
   });
 
-  alert(`✓ Dados replicados para ${MONTHS[nm]} ${ny}!\nUse as setas do cabeçalho para navegar.`);
+  if (sel.includes('cards')) { db.saveCards(ny, nm, repResultado('cards').itens); n++; }
+  if (sel.includes('campos')) {
+    db.saveCampos(ny, nm, {
+      salario:   state.campos.salario,
+      proventos: state.campos.proventos,
+      saldo:     'R$ 0,00',
+    });
+    n++;
+  }
+
+  closeRepModal();
+  toast('✓ ' + n + (n === 1 ? ' seção replicada' : ' itens replicados') +
+        ' para ' + MONTHS[nm] + ' ' + ny);
 }
 
 // ─── MODAL INICIAL ───────────────────────────────────────────────
@@ -1470,14 +1990,25 @@ function saveParcModal() {
 document.getElementById('modal-bg').addEventListener('click', e => {
   if (e.target===e.currentTarget) closeModal();
 });
+document.getElementById('rep-modal-bg').addEventListener('click', e => {
+  if (e.target===e.currentTarget) closeRepModal();
+});
+document.getElementById('pick-modal-bg').addEventListener('click', e => {
+  if (e.target===e.currentTarget) closePickModal();
+});
 // O modal de parcela NÃO fecha ao clicar fora — só via Salvar/Cancelar.
 document.addEventListener('keydown', e => {
   if (e.key==='Enter') {
-    if (document.getElementById('parc-modal-bg').classList.contains('open')) saveParcModal();
+    if (document.getElementById('pick-modal-bg').classList.contains('open')) pickConfirm();
+    else if (document.getElementById('rep-modal-bg').classList.contains('open')) confirmarReplicar();
+    else if (document.getElementById('parc-modal-bg').classList.contains('open')) saveParcModal();
     else if (document.getElementById('modal-bg').classList.contains('open')) doModal();
     if (document.getElementById('init-modal-bg').classList.contains('open')) initPeriod();
   }
-  if (e.key==='Escape') { closeModal(); closeParcModal(); }
+  if (e.key==='Escape') {
+    if (document.getElementById('pick-modal-bg').classList.contains('open')) closePickModal();
+    else { closeModal(); closeParcModal(); closeRepModal(); }
+  }
 });
 
 // ─── MENU / ABAS ─────────────────────────────────────────────────
