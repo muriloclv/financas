@@ -557,6 +557,22 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
 
 /* ─── Tabelas roláveis em qualquer tela (no desktop cabem, não aparece barra) ─── */
 .tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+
+/* ─── Arrastar para reordenar ─── */
+.grip{display:inline-flex;align-items:center;justify-content:center;color:#3a4159;
+  cursor:grab;touch-action:none;padding:5px 3px;border-radius:5px;transition:color .15s,background .15s;}
+.grip:hover{color:var(--gold);background:var(--surface2);}
+.grip:active{cursor:grabbing;}
+th.grip-c,td.grip-c{width:26px;padding-left:8px;padding-right:0;}
+tr.arrastando{opacity:.4;}
+tr.arrastando td{background:var(--surface2);}
+.summary-card.arrastando{opacity:.4;}
+body.arrastando-on{user-select:none;-webkit-user-select:none;cursor:grabbing;}
+body.arrastando-on .grip{cursor:grabbing;}
+@media(max-width:640px){
+  .grip{padding:9px 7px;}
+  th.grip-c,td.grip-c{width:34px;}
+}
 /* Modais nunca estouram a altura da tela (vale em todos os tamanhos) */
 .modal{max-height:92vh;overflow-y:auto;}
 
@@ -763,6 +779,7 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
       <div class="faixa-tot">
         <span class="tot-lbl">Total de entradas</span>
         <span class="tot-val" id="sum-entradas" style="color:var(--green)">R$ 0,00</span>
+        <span class="res-nota" id="nota-in"></span>
       </div>
     </div>
 
@@ -818,7 +835,7 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
       <div class="faixa-tot">
         <span class="tot-lbl">Total de saídas</span>
         <span class="tot-val" id="sum-saidas" style="color:var(--red)">R$ 0,00</span>
-        <span class="res-nota">só os gastos fixos entram na conta</span>
+        <span class="res-nota" id="nota-out">cartão e IA ficam fora desta conta</span>
       </div>
     </div>
 
@@ -895,6 +912,7 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
       <div class="tbl-scroll">
       <table>
         <thead><tr>
+          <th class="grip-c"></th>
           <th>Descrição</th>
           <th style="text-align:right">Valor</th>
           <th style="text-align:center;width:72px">Parcela</th>
@@ -952,6 +970,7 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
       <div class="tbl-scroll">
       <table>
         <thead><tr>
+          <th class="grip-c"></th>
           <th>Descrição</th>
           <th style="text-align:right">Valor</th>
           <th style="text-align:center;width:72px">Parcela</th>
@@ -1002,6 +1021,7 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
       <div class="tbl-scroll">
       <table>
         <thead><tr>
+          <th class="grip-c"></th>
           <th>Descrição</th>
           <th style="text-align:right">Valor</th>
           <th style="text-align:center;width:72px">Parcela</th>
@@ -1039,6 +1059,7 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
       <div class="tbl-scroll">
       <table>
         <thead><tr>
+          <th class="grip-c"></th>
           <th>Tipo</th>
           <th style="text-align:right">Valor</th>
           <th>Data</th>
@@ -1420,7 +1441,9 @@ function renderSec(s) {
       : '';
     const tr = document.createElement('tr');
     if (isPaid) tr.className = 'paid';
+    tr.dataset.i = i;
     tr.innerHTML = `
+      <td class="grip-c"><span class="grip" title="Arraste para reordenar">${GRIP}</span></td>
       <td class="en"><input value="${esc(item.name)}" onblur="upd('${s}',${i},'name',this.value)"></td>
       <td class="ev" style="text-align:right"><input value="${fmt(item.value)}" style="text-align:right" oninput="numOnly(this)" onfocus="selAll(this)" onblur="updVal('${s}',${i},this)"></td>
       <td style="text-align:center;width:72px">${parcEl}</td>
@@ -1447,7 +1470,9 @@ function renderInvestimentos() {
       ? new Date(item.data+'T00:00:00').toLocaleDateString('pt-BR')
       : '—';
     const tr = document.createElement('tr');
+    tr.dataset.i = i;
     tr.innerHTML = `
+      <td class="grip-c"><span class="grip" title="Arraste para reordenar">${GRIP}</span></td>
       <td class="et"><input value="${esc(item.tipo||'')}" placeholder="tipo..." onblur="updInvest(${i},'tipo',this.value)"></td>
       <td class="ev ok" style="text-align:right"><input value="${fmt(item.valor||0)}" style="text-align:right" oninput="numOnly(this)" onfocus="selAll(this)" onblur="updInvest(${i},'valor',this.value)"></td>
       <td style="color:var(--muted);font-size:12px;white-space:nowrap">${dateStr}</td>
@@ -1471,11 +1496,13 @@ function renderCC() {
   loadCC().forEach((c,i) => {
     const d = document.createElement('div');
     d.className = `summary-card ${c.color}`;
+    d.dataset.i = i;
     const infTag = c.influi
-      ? `<span class="inf-tag ${c.sinal==='-'?'neg':'pos'}">${c.sinal==='-'?'↓':'↑'} Sobra</span>`
+      ? `<span class="inf-tag ${c.sinal==='-'?'neg':'pos'}">${c.sinal==='-'?'↓ Saída':'↑ Entrada'}</span>`
       : '';
     d.innerHTML = `
       <div class="card-label-wrap">
+        <span class="grip" title="Arraste para reordenar">${GRIP}</span>
         <span class="card-label">${esc(c.name)}</span>${infTag}
         <button class="icon-btn" onclick="openEditCC(${i})" title="Editar">✎</button>
         <button class="icon-btn del" onclick="delCC(${i})" title="Remover">×</button>
@@ -1502,19 +1529,34 @@ function recalc() {
   const sal   = parse(document.getElementById('field-salario').value);
   const prov  = parse(document.getElementById('field-proventos').value);
   const saldo = parseSigned(document.getElementById('field-saldo').value);
-  // cards personalizados que influenciam a Sobra (+ soma / − subtrai)
-  const cardsAdj = loadCC().reduce((a,c)=> a + (c.influi ? (c.sinal==='-'?-1:1)*parse(c.value) : 0), 0);
-  const entradas = sal + prov + saldo;
-  const sobra = entradas - grand + cardsAdj;
+  // Card marcado como "influi" entra na conta pelo lado que o sinal indica:
+  // + é entrada, − é saída. A sobra dá o mesmo de antes, mas agora os subtotais
+  // mostram de onde o valor veio, em vez de ele aparecer só no resultado.
+  const cc = loadCC().filter(c => c.influi);
+  const ccIn  = cc.filter(c => c.sinal !== '-');
+  const ccOut = cc.filter(c => c.sinal === '-');
+  const somaIn  = ccIn.reduce((a,c)=> a + parse(c.value), 0);
+  const somaOut = ccOut.reduce((a,c)=> a + parse(c.value), 0);
+  const entradas = sal + prov + saldo + somaIn;
+  const saidas   = grand + somaOut;
+  const sobra    = entradas - saidas;
 
   const set = (id, txt) => { document.getElementById(id).textContent = txt; };
 
+  const notaCards = (v, n, cor) => n === 0 ? '' :
+    'inclui <span style="color:' + cor + '">' + fmt(v) + '</span> de ' +
+    n + (n === 1 ? ' card' : ' cards');
+
   // ── Entradas
   set('sum-entradas', fmt(entradas));
+  document.getElementById('nota-in').innerHTML = notaCards(somaIn, ccIn.length, 'var(--green)');
 
   // ── Saídas. Cartão e IA são acompanhados à parte: NÃO entram no total nem na sobra.
   set('sum-total',  fmt(grand));
-  set('sum-saidas', fmt(grand));
+  set('sum-saidas', fmt(saidas));
+  document.getElementById('nota-out').innerHTML =
+    [notaCards(somaOut, ccOut.length, 'var(--red)'), 'cartão e IA ficam fora desta conta']
+      .filter(Boolean).join(' · ');
   set('sum-cartao', fmt(loadSec('cartao').reduce((a,i)=>a+i.value, 0)));
   set('sum-ia',     fmt(loadSec('ia').reduce((a,i)=>a+i.value, 0)));
 
@@ -1529,7 +1571,7 @@ function recalc() {
 
   // ── Resultado
   set('eq-in',  fmt(entradas));
-  set('eq-out', fmt(grand));
+  set('eq-out', fmt(saidas));
   set('eq-res', fmtS(sobra));
   const elSobra = document.getElementById('sum-sobra');
   elSobra.textContent = fmtS(sobra);
@@ -1629,6 +1671,96 @@ function toggleForm(id) {
   f.classList.toggle('open');
   if (f.classList.contains('open')) f.querySelector('input').focus();
 }
+
+// ─── ARRASTAR PARA REORDENAR ─────────────────────────────────────
+const GRIP = '<svg width="9" height="14" viewBox="0 0 9 14" aria-hidden="true">' +
+  '<g fill="currentColor"><circle cx="2" cy="3" r="1"/><circle cx="7" cy="3" r="1"/>' +
+  '<circle cx="2" cy="7" r="1"/><circle cx="7" cy="7" r="1"/>' +
+  '<circle cx="2" cy="11" r="1"/><circle cx="7" cy="11" r="1"/></g></svg>';
+
+// Ponteiro (mouse E toque) em vez de HTML5 drag-and-drop, que não funciona no celular.
+// eixo 'y' para listas em tabela, 'x' para a grade de cards.
+function sortable(cont, itemSel, eixo, onEnd) {
+  if (!cont) return;
+  cont.addEventListener('pointerdown', e => {
+    const punho = e.target.closest('.grip');
+    if (!punho || !cont.contains(punho)) return;
+    const el = punho.closest(itemSel);
+    if (!el) return;
+    e.preventDefault();
+
+    let mexeu = false, ultimoY = e.clientY;
+    try { punho.setPointerCapture(e.pointerId); } catch (_) {}  // ponteiro já solto
+    el.classList.add('arrastando');
+    document.body.classList.add('arrastando-on');
+
+    const itens = () => [...cont.querySelectorAll(itemSel)];
+
+    // rola a página sozinho quando o dedo/cursor chega perto da borda
+    const rolar = setInterval(() => {
+      const m = 70;
+      if (ultimoY < m) scrollBy(0, -11);
+      else if (ultimoY > innerHeight - m) scrollBy(0, 11);
+    }, 16);
+
+    const mover = ev => {
+      ultimoY = ev.clientY;
+      const alvo = itens().find(n => {
+        if (n === el) return false;
+        const r = n.getBoundingClientRect();
+        return ev.clientX >= r.left && ev.clientX <= r.right &&
+               ev.clientY >= r.top  && ev.clientY <= r.bottom;
+      });
+      if (!alvo) return;
+      const r = alvo.getBoundingClientRect();
+      const depois = eixo === 'x'
+        ? ev.clientX > r.left + r.width / 2
+        : ev.clientY > r.top + r.height / 2;
+      alvo.parentNode.insertBefore(el, depois ? alvo.nextSibling : alvo);
+      mexeu = true;
+    };
+
+    const fim = () => {
+      clearInterval(rolar);
+      document.removeEventListener('pointermove', mover);
+      document.removeEventListener('pointerup', fim);
+      document.removeEventListener('pointercancel', fim);
+      el.classList.remove('arrastando');
+      document.body.classList.remove('arrastando-on');
+      if (mexeu) onEnd(itens().map(n => +n.dataset.i));
+    };
+
+    document.addEventListener('pointermove', mover);
+    document.addEventListener('pointerup', fim);
+    document.addEventListener('pointercancel', fim);
+  });
+}
+
+// ordem = índices originais na nova sequência
+function reordenar(arr, ordem) {
+  return ordem.every(i => Number.isInteger(i) && arr[i] !== undefined) && ordem.length === arr.length
+    ? ordem.map(i => arr[i])
+    : arr;
+}
+
+function initSortables() {
+  ['fixas','cartao','ia'].forEach(s => {
+    sortable(document.getElementById('tbody-'+s), 'tr', 'y', ordem => {
+      saveSec(s, reordenar(loadSec(s), ordem));
+      renderSec(s);
+    });
+  });
+  sortable(document.getElementById('tbody-investimentos'), 'tr', 'y', ordem => {
+    saveSec('investimentos', reordenar(loadSec('investimentos'), ordem));
+    renderInvestimentos();
+  });
+  sortable(document.getElementById('custom-cards'), '.summary-card', 'x', ordem => {
+    saveCC(reordenar(loadCC(), ordem));
+    renderCC();
+    recalc();
+  });
+}
+initSortables();
 
 // ─── REPLICAR MÊS ──────────────────────────────
 const REP_SECOES = [
