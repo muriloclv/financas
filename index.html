@@ -49,8 +49,74 @@ header h1{font-family:'DM Serif Display',serif;font-size:19px;color:var(--gold);
 .container{max-width:1140px;margin:0 auto;padding:22px 18px;}
 
 /* SUMMARY CARDS */
-.summary-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));
-  gap:12px;margin-bottom:26px;align-items:stretch;}
+.summary-grid{margin-bottom:26px;}
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));
+  gap:12px;align-items:stretch;}
+
+/* ─── Resumo em 3 faixas: Entradas → Saídas → Resultado ─── */
+.faixa{display:flex;gap:20px;align-items:stretch;background:var(--surface);
+  border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin-bottom:14px;
+  position:relative;overflow:hidden;}
+.faixa::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.faixa.f-in::before{background:var(--green);}
+.faixa.f-out::before{background:var(--red);}
+.faixa.f-res{background:rgba(201,168,76,.07);border-color:var(--gold);align-items:center;
+  padding:18px 20px;margin-bottom:22px;}
+.faixa.f-res::before{background:var(--gold);}
+.faixa-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:11px;}
+.faixa-head{display:flex;align-items:center;gap:7px;}
+.faixa-dot{width:7px;height:7px;border-radius:50%;flex:none;}
+.faixa-nome{font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:600;}
+.faixa-sub{font-size:11px;color:var(--muted);}
+.f-in .faixa-nome{color:var(--green);}   .f-in .faixa-dot{background:var(--green);}
+.f-out .faixa-nome{color:var(--red);}    .f-out .faixa-dot{background:var(--red);}
+.f-res .faixa-nome{color:var(--gold);}   .f-res .faixa-dot{background:var(--gold);}
+.faixa-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}
+.faixa-tot{width:232px;flex:none;border-left:1px solid var(--border);padding-left:20px;
+  display:flex;flex-direction:column;justify-content:center;gap:4px;}
+.faixa-tot .tot-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);}
+.faixa-tot .tot-val{font-family:'DM Serif Display',serif;font-size:33px;line-height:1.1;
+  white-space:nowrap;}
+
+/* mini card dentro da faixa */
+.mini{background:var(--surface2);border:1px solid var(--border);border-radius:10px;
+  padding:11px 13px;display:flex;flex-direction:column;gap:5px;min-width:0;}
+.mini-top{display:flex;align-items:center;gap:5px;min-width:0;}
+.mini-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);
+  flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.mini-val{font-family:'DM Serif Display',serif;font-size:19px;}
+.mini .edit-inline{font-size:19px;border-bottom-color:rgba(74,111,165,.55);align-self:flex-start;
+  width:auto;max-width:100%;padding-bottom:2px;}
+.mini .edit-inline:focus{border-color:var(--gold);}
+.mini .icon-btn{opacity:0;}
+.mini:hover .icon-btn{opacity:1;}
+.tag-fora{font-size:9px;color:var(--gold);background:var(--gold-soft);padding:1px 5px;
+  border-radius:4px;flex:none;white-space:nowrap;}
+
+/* barra Já pago / A pagar */
+.barra{height:8px;border-radius:99px;background:var(--border);display:flex;overflow:hidden;}
+.barra > span{display:block;transition:width .25s;}
+.barra-leg{display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
+.leg{display:flex;align-items:center;gap:6px;}
+.leg-quad{width:7px;height:7px;border-radius:2px;flex:none;}
+.leg-txt{font-size:11px;color:var(--muted);}
+.leg-val{font-size:11.5px;font-weight:600;}
+
+/* faixa de resultado */
+.eq{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--muted);flex-wrap:wrap;}
+.eq-op{color:#4a5169;}
+.res-bar{height:6px;border-radius:99px;background:var(--border);overflow:hidden;max-width:420px;}
+.res-bar > span{display:block;height:100%;background:var(--gold);transition:width .25s;}
+.res-nota{font-size:11px;color:var(--muted);}
+.faixa-res-val{width:300px;flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
+.faixa-res-val .tot-lbl{color:var(--gold);}
+.faixa-res-val .tot-val{font-size:46px;line-height:1.05;color:var(--gold);}
+
+/* cabeçalho da área de cards personalizados */
+.cards-head{display:flex;align-items:center;gap:9px;margin-bottom:10px;}
+.cards-head b{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600;}
+.cards-head i{flex:1;height:1px;background:var(--border);}
+.cards-head small{font-size:10.5px;color:#4a5169;font-style:normal;}
 .summary-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;
   padding:15px 18px;position:relative;overflow:hidden;min-height:84px;
   display:flex;flex-direction:column;justify-content:space-between;}
@@ -479,7 +545,7 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
 }
 
 @media(max-width:760px){
-  .summary-grid{grid-template-columns:repeat(2,1fr);}
+  .cards-grid{grid-template-columns:repeat(2,1fr);}
   header{height:auto;padding:8px 12px;flex-wrap:wrap;gap:8px;}
   header h1{font-size:16px;}
   .hdr-logo{width:28px;height:28px;}
@@ -505,8 +571,22 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
   .mrow{flex-direction:column;gap:0;}
   .modal{padding:22px 18px 18px;}
   .fat-upload .cbtn,.add-form .cbtn{width:100%;}
-  /* Resumo: 2 colunas compactas (em vez de 1 coluna gigante) */
-  .summary-grid{grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px;}
+  /* Resumo: faixas empilham e o subtotal vira rodapé da faixa */
+  .summary-grid{margin-bottom:18px;}
+  .cards-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
+  .faixa{flex-direction:column;gap:10px;padding:13px 14px;margin-bottom:11px;}
+  .faixa.f-res{padding:15px 16px;margin-bottom:18px;}
+  .faixa-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+  .faixa-cards > .mini:nth-child(3):last-child{grid-column:span 2;}
+  .faixa-tot{width:auto;border-left:none;border-top:1px solid var(--border);
+    padding-left:0;padding-top:9px;flex-direction:row;align-items:baseline;
+    justify-content:space-between;gap:10px;flex-wrap:wrap;}
+  .faixa-tot .res-nota{flex-basis:100%;}
+  .faixa-tot .tot-val{font-size:23px;}
+  .faixa-res-val{width:auto;align-items:flex-start;}
+  .faixa-res-val .tot-val{font-size:36px;}
+  .res-bar{max-width:none;}
+  .barra-leg{gap:10px;}
   .summary-card,.add-card-btn{padding:12px 13px;min-height:72px;}
   .card-value,.edit-inline{font-size:17px;}
   .card-label{font-size:10px;letter-spacing:.06em;}
@@ -644,48 +724,138 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
 
   <!-- ═══ SUMMARY CARDS ═══ -->
   <div class="summary-grid" id="summary-grid">
-    <div class="summary-card c-teal">
-      <div class="card-label-wrap">
-        <span class="card-label" id="lbl-saldo">Saldo em Conta</span>
-        <button class="icon-btn" onclick="openRenameFixed('saldo')" title="Renomear">✎</button>
+
+    <!-- ── ENTRADAS ── -->
+    <div class="faixa f-in">
+      <div class="faixa-main">
+        <div class="faixa-head">
+          <span class="faixa-dot"></span>
+          <span class="faixa-nome">Entradas</span>
+          <span class="faixa-sub">· o que você recebeu</span>
+        </div>
+        <div class="faixa-cards">
+          <div class="mini">
+            <div class="mini-top">
+              <span class="mini-lbl" id="lbl-salario">Salário</span>
+              <button class="icon-btn" onclick="openRenameFixed('salario')" title="Renomear">✎</button>
+            </div>
+            <input class="edit-inline" id="field-salario" value="R$ 0,00" style="color:var(--green)"
+              oninput="numOnly(this)" onblur="saveCampo('salario',this)" onfocus="selAll(this)">
+          </div>
+          <div class="mini">
+            <div class="mini-top">
+              <span class="mini-lbl" id="lbl-proventos">Demais Proventos</span>
+              <button class="icon-btn" onclick="openRenameFixed('proventos')" title="Renomear">✎</button>
+            </div>
+            <input class="edit-inline" id="field-proventos" value="R$ 0,00" style="color:var(--green)"
+              oninput="numOnly(this)" onblur="saveCampo('proventos',this)" onfocus="selAll(this)">
+          </div>
+          <div class="mini">
+            <div class="mini-top">
+              <span class="mini-lbl" id="lbl-saldo">Saldo em Conta</span>
+              <button class="icon-btn" onclick="openRenameFixed('saldo')" title="Renomear">✎</button>
+            </div>
+            <input class="edit-inline" id="field-saldo" value="R$ 0,00" style="color:#3ab5b0"
+              oninput="numOnly(this,true)" onblur="saveCampo('saldo',this,true)" onfocus="selAll(this)">
+          </div>
+        </div>
       </div>
-      <input class="edit-inline" id="field-saldo" value="R$ 0,00" style="color:#3ab5b0"
-        oninput="numOnly(this,true)" onblur="saveCampo('saldo',this,true)" onfocus="selAll(this)">
-    </div>
-    <div class="summary-card c-green">
-      <div class="card-label-wrap">
-        <span class="card-label" id="lbl-salario">Salário</span>
-        <button class="icon-btn" onclick="openRenameFixed('salario')" title="Renomear">✎</button>
+      <div class="faixa-tot">
+        <span class="tot-lbl">Total de entradas</span>
+        <span class="tot-val" id="sum-entradas" style="color:var(--green)">R$ 0,00</span>
       </div>
-      <input class="edit-inline" id="field-salario" value="R$ 0,00"
-        oninput="numOnly(this)" onblur="saveCampo('salario',this)" onfocus="selAll(this)">
     </div>
-    <div class="summary-card c-blue">
-      <div class="card-label-wrap">
-        <span class="card-label" id="lbl-proventos">Demais Proventos</span>
-        <button class="icon-btn" onclick="openRenameFixed('proventos')" title="Renomear">✎</button>
+
+    <!-- ── SAÍDAS ── -->
+    <div class="faixa f-out">
+      <div class="faixa-main">
+        <div class="faixa-head">
+          <span class="faixa-dot"></span>
+          <span class="faixa-nome">Saídas</span>
+          <span class="faixa-sub">· o que você gastou</span>
+        </div>
+        <div class="faixa-cards">
+          <div class="mini">
+            <div class="mini-top"><span class="mini-lbl" id="lbl-sec-fixas">Gastos Fixos</span></div>
+            <span class="mini-val" id="sum-total" style="color:var(--red)">R$ 0,00</span>
+          </div>
+          <div class="mini">
+            <div class="mini-top">
+              <span class="mini-lbl" id="lbl-sec-cartao">Cartão</span>
+              <span class="tag-fora" title="Não entra no total nem na sobra">fora do total</span>
+            </div>
+            <span class="mini-val" id="sum-cartao" style="color:var(--muted)">R$ 0,00</span>
+          </div>
+          <div class="mini">
+            <div class="mini-top">
+              <span class="mini-lbl" id="lbl-sec-ia">Gastos com IA</span>
+              <span class="tag-fora" title="Não entra no total nem na sobra">fora do total</span>
+            </div>
+            <span class="mini-val" id="sum-ia" style="color:var(--muted)">R$ 0,00</span>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:7px;margin-top:2px">
+          <div class="barra">
+            <span id="bar-pago" style="width:0%;background:var(--green)"></span>
+            <span id="bar-apagar" style="width:100%;background:var(--gold)"></span>
+          </div>
+          <div class="barra-leg">
+            <span class="leg">
+              <span class="leg-quad" style="background:var(--green)"></span>
+              <span class="leg-txt">Já pago</span>
+              <span class="leg-val" id="sum-pago" style="color:var(--green)">R$ 0,00</span>
+              <span class="leg-txt" id="pct-pago">0%</span>
+            </span>
+            <span class="leg">
+              <span class="leg-quad" style="background:var(--gold)"></span>
+              <span class="leg-txt">A pagar</span>
+              <span class="leg-val" id="sum-apagar" style="color:var(--gold)">R$ 0,00</span>
+              <span class="leg-txt" id="pct-apagar">0%</span>
+            </span>
+          </div>
+        </div>
       </div>
-      <input class="edit-inline" id="field-proventos" value="R$ 0,00" style="color:var(--blue)"
-        oninput="numOnly(this)" onblur="saveCampo('proventos',this)" onfocus="selAll(this)">
+      <div class="faixa-tot">
+        <span class="tot-lbl">Total de saídas</span>
+        <span class="tot-val" id="sum-saidas" style="color:var(--red)">R$ 0,00</span>
+        <span class="res-nota">só os gastos fixos entram na conta</span>
+      </div>
     </div>
-    <div class="summary-card c-red">
-      <div class="card-label-wrap"><span class="card-label">Total de Gastos</span></div>
-      <div class="card-value" id="sum-total">R$ 0,00</div>
+
+    <!-- ── RESULTADO ── -->
+    <div class="faixa f-res">
+      <div class="faixa-main">
+        <div class="faixa-head">
+          <span class="faixa-dot"></span>
+          <span class="faixa-nome">Resultado</span>
+        </div>
+        <div class="eq">
+          <span id="eq-in" style="color:var(--green)">R$ 0,00</span>
+          <span class="eq-op">−</span>
+          <span id="eq-out" style="color:var(--red)">R$ 0,00</span>
+          <span class="eq-op">=</span>
+          <span id="eq-res" style="color:var(--gold);font-weight:600">R$ 0,00</span>
+        </div>
+        <div class="res-bar"><span id="bar-sobra" style="width:0%"></span></div>
+        <span class="res-nota" id="nota-sobra">—</span>
+      </div>
+      <div class="faixa-res-val">
+        <span class="tot-lbl" id="lbl-sobra">Possível sobra do mês</span>
+        <span class="tot-val" id="sum-sobra">R$ 0,00</span>
+      </div>
     </div>
-    <div class="summary-card c-green">
-      <div class="card-label-wrap"><span class="card-label">Gastos Fixos · Já Pago</span></div>
-      <div class="card-value" id="sum-pago">R$ 0,00</div>
+
+    <!-- ── CARDS PERSONALIZADOS ── -->
+    <div class="cards-head">
+      <b>Seus cards</b>
+      <i></i>
+      <small>valores que você acompanha à parte</small>
     </div>
-    <div class="summary-card c-gold">
-      <div class="card-label-wrap"><span class="card-label">Gastos Fixos · A Pagar</span></div>
-      <div class="card-value" id="sum-apagar">R$ 0,00</div>
+    <div class="cards-grid">
+      <div id="custom-cards"></div>
+      <button class="add-card-btn" onclick="openAddCard()"><span>＋</span><small>Novo Card</small></button>
     </div>
-    <div class="summary-card c-purple">
-      <div class="card-label-wrap"><span class="card-label">Possível Sobra do Mês</span></div>
-      <div class="card-value" id="sum-sobra">R$ 0,00</div>
-    </div>
-    <div id="custom-cards"></div>
-    <button class="add-card-btn" onclick="openAddCard()"><span>＋</span><small>Novo Card</small></button>
+
   </div>
 
   <!-- ═══ PAINÉIS DAS ABAS ═══ -->
@@ -1334,19 +1504,53 @@ function recalc() {
   const saldo = parseSigned(document.getElementById('field-saldo').value);
   // cards personalizados que influenciam a Sobra (+ soma / − subtrai)
   const cardsAdj = loadCC().reduce((a,c)=> a + (c.influi ? (c.sinal==='-'?-1:1)*parse(c.value) : 0), 0);
-  const sobra = sal + prov + saldo - grand + cardsAdj;
+  const entradas = sal + prov + saldo;
+  const sobra = entradas - grand + cardsAdj;
 
-  document.getElementById('sum-total').textContent  = fmt(grand);
-  document.getElementById('sum-pago').textContent   = fmt(pago);
-  document.getElementById('sum-apagar').textContent = fmt(aPagar);
-  const el = document.getElementById('sum-sobra');
-  el.textContent = fmtS(sobra);
-  el.style.color = sobra >= 0 ? 'var(--green)' : 'var(--red)';
+  const set = (id, txt) => { document.getElementById(id).textContent = txt; };
+
+  // ── Entradas
+  set('sum-entradas', fmt(entradas));
+
+  // ── Saídas. Cartão e IA são acompanhados à parte: NÃO entram no total nem na sobra.
+  set('sum-total',  fmt(grand));
+  set('sum-saidas', fmt(grand));
+  set('sum-cartao', fmt(loadSec('cartao').reduce((a,i)=>a+i.value, 0)));
+  set('sum-ia',     fmt(loadSec('ia').reduce((a,i)=>a+i.value, 0)));
+
+  // barra Já pago / A pagar (proporção dentro dos Gastos Fixos)
+  const pctPago = grand > 0 ? (pago / grand) * 100 : 0;
+  document.getElementById('bar-pago').style.width   = pctPago + '%';
+  document.getElementById('bar-apagar').style.width = (100 - pctPago) + '%';
+  set('sum-pago',   fmt(pago));
+  set('sum-apagar', fmt(aPagar));
+  set('pct-pago',   Math.round(pctPago) + '%');
+  set('pct-apagar', Math.round(100 - pctPago) + '%');
+
+  // ── Resultado
+  set('eq-in',  fmt(entradas));
+  set('eq-out', fmt(grand));
+  set('eq-res', fmtS(sobra));
+  const elSobra = document.getElementById('sum-sobra');
+  elSobra.textContent = fmtS(sobra);
+  const cor = sobra >= 0 ? 'var(--gold)' : 'var(--red)';
+  elSobra.style.color = cor;
+  document.getElementById('eq-res').style.color = cor;
+
+  const pctSobra = entradas > 0 ? (sobra / entradas) * 100 : 0;
+  const barra = document.getElementById('bar-sobra');
+  barra.style.width = Math.max(0, Math.min(100, pctSobra)) + '%';
+  barra.style.background = cor;
+  document.getElementById('nota-sobra').innerHTML = sobra < 0
+    ? 'Suas saídas passaram as entradas em <span style="color:var(--red)">' + fmt(sobra) + '</span>'
+    : entradas > 0
+      ? 'Você guardou <span style="color:var(--gold)">' + Math.round(pctSobra) +
+        '%</span> de tudo que entrou este mês'
+      : 'Preencha suas entradas para ver quanto sobra';
 
   renderChart();
 }
 
-// ─── MUTAÇÕES ────────────────────────────────────────────────────
 function upd(s,i,f,v) {
   const d = loadSec(s);
   if (f==='value') d[i].value = parse(v); else d[i][f] = v;
@@ -2570,7 +2774,10 @@ async function loadUI() {
   });
   const snDef = { fixas:'Gastos Fixos', cartao:'Contas parceladas e fixas no cartão', ia:'Gastos com IA' };
   ['fixas','cartao','ia'].forEach(s => {
-    document.getElementById('sn-'+s).textContent = cfgGet('sn_'+s, snDef[s]);
+    const nome = cfgGet('sn_'+s, snDef[s]);
+    document.getElementById('sn-'+s).textContent = nome;
+    const mini = document.getElementById('lbl-sec-'+s);   // mini card da faixa Saídas
+    if (mini) { mini.textContent = nome; mini.title = nome; }
   });
 
   renderCC();
