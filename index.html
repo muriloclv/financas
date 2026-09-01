@@ -564,11 +564,25 @@ footer{text-align:center;padding:22px;color:var(--muted);font-size:12px;}
 .grip:hover{color:var(--gold);background:var(--surface2);}
 .grip:active{cursor:grabbing;}
 th.grip-c,td.grip-c{width:26px;padding-left:8px;padding-right:0;}
-tr.arrastando{opacity:.4;}
-tr.arrastando td{background:var(--surface2);}
-.summary-card.arrastando{opacity:.4;}
+/* a origem vira um vazio, mostrando onde o item vai cair */
+tr.arrastando td{background:var(--gold-soft);}
+tr.arrastando td > *{opacity:.12;}
+.summary-card.arrastando{background:var(--surface2);border-style:dashed;border-color:var(--gold);}
+.summary-card.arrastando::before{opacity:0;}
+.summary-card.arrastando > *{opacity:.12;}
 body.arrastando-on{user-select:none;-webkit-user-select:none;cursor:grabbing;}
 body.arrastando-on .grip{cursor:grabbing;}
+/* o item flutuante que segue o dedo/cursor */
+.fantasma{position:fixed;left:0;top:0;z-index:900;pointer-events:none;
+  border-radius:10px;overflow:hidden;background:var(--surface);
+  box-shadow:0 16px 38px rgba(0,0,0,.6);outline:1px solid var(--gold);
+  will-change:transform;}
+.fantasma table{border-collapse:collapse;width:100%;background:var(--surface);}
+.fantasma td{background:var(--surface2);}
+.fantasma .summary-card{margin:0;}
+/* pressionando, antes de liberar o arraste */
+tr.pressionando td{background:var(--surface2);}
+.summary-card.pressionando{border-color:var(--gold);}
 @media(max-width:640px){
   .grip{padding:9px 7px;}
   th.grip-c,td.grip-c{width:34px;}
@@ -1443,7 +1457,7 @@ function renderSec(s) {
     if (isPaid) tr.className = 'paid';
     tr.dataset.i = i;
     tr.innerHTML = `
-      <td class="grip-c"><span class="grip" title="Arraste para reordenar">${GRIP}</span></td>
+      <td class="grip-c"><span class="grip" title="Arraste, ou segure a linha, para reordenar">${GRIP}</span></td>
       <td class="en"><input value="${esc(item.name)}" onblur="upd('${s}',${i},'name',this.value)"></td>
       <td class="ev" style="text-align:right"><input value="${fmt(item.value)}" style="text-align:right" oninput="numOnly(this)" onfocus="selAll(this)" onblur="updVal('${s}',${i},this)"></td>
       <td style="text-align:center;width:72px">${parcEl}</td>
@@ -1472,7 +1486,7 @@ function renderInvestimentos() {
     const tr = document.createElement('tr');
     tr.dataset.i = i;
     tr.innerHTML = `
-      <td class="grip-c"><span class="grip" title="Arraste para reordenar">${GRIP}</span></td>
+      <td class="grip-c"><span class="grip" title="Arraste, ou segure a linha, para reordenar">${GRIP}</span></td>
       <td class="et"><input value="${esc(item.tipo||'')}" placeholder="tipo..." onblur="updInvest(${i},'tipo',this.value)"></td>
       <td class="ev ok" style="text-align:right"><input value="${fmt(item.valor||0)}" style="text-align:right" oninput="numOnly(this)" onfocus="selAll(this)" onblur="updInvest(${i},'valor',this.value)"></td>
       <td style="color:var(--muted);font-size:12px;white-space:nowrap">${dateStr}</td>
@@ -1502,7 +1516,7 @@ function renderCC() {
       : '';
     d.innerHTML = `
       <div class="card-label-wrap">
-        <span class="grip" title="Arraste para reordenar">${GRIP}</span>
+        <span class="grip" title="Arraste, ou segure a linha, para reordenar">${GRIP}</span>
         <span class="card-label">${esc(c.name)}</span>${infTag}
         <button class="icon-btn" onclick="openEditCC(${i})" title="Editar">✎</button>
         <button class="icon-btn del" onclick="delCC(${i})" title="Remover">×</button>
@@ -1679,32 +1693,95 @@ const GRIP = '<svg width="9" height="14" viewBox="0 0 9 14" aria-hidden="true">'
   '<circle cx="2" cy="11" r="1"/><circle cx="7" cy="11" r="1"/></g></svg>';
 
 // Ponteiro (mouse E toque) em vez de HTML5 drag-and-drop, que não funciona no celular.
+// Dois jeitos de começar: pelo punho (na hora) ou segurando a linha por meio segundo.
 // eixo 'y' para listas em tabela, 'x' para a grade de cards.
+const ARRASTE_ESPERA = 500;   // ms segurando a linha até liberar o arraste
+const ARRASTE_FOLGA  = 8;     // px que o dedo pode escorregar sem cancelar a espera
+
+// Cópia visual que segue o ponteiro. <tr> não sobrevive fora de uma <table>,
+// então a linha é reembalada numa tabela própria com as larguras congeladas.
+function criarFantasma(el, r) {
+  const g = document.createElement('div');
+  g.className = 'fantasma';
+  g.style.width = r.width + 'px';
+  const clone = el.cloneNode(true);
+  clone.classList.remove('arrastando', 'pressionando');
+  if (el.tagName === 'TR') {
+    [...el.children].forEach((td, i) => {
+      const c = clone.children[i];
+      if (c) c.style.width = td.getBoundingClientRect().width + 'px';
+    });
+    const tab = document.createElement('table');
+    const tb = document.createElement('tbody');
+    tb.appendChild(clone); tab.appendChild(tb); g.appendChild(tab);
+  } else {
+    clone.style.width = r.width + 'px';
+    g.appendChild(clone);
+  }
+  // cloneNode não leva o valor digitado, só o atributo
+  const orig = el.querySelectorAll('input'), copia = clone.querySelectorAll('input');
+  orig.forEach((inp, i) => { if (copia[i]) copia[i].value = inp.value; });
+  document.body.appendChild(g);
+  return g;
+}
+
 function sortable(cont, itemSel, eixo, onEnd) {
   if (!cont) return;
-  cont.addEventListener('pointerdown', e => {
-    const punho = e.target.closest('.grip');
-    if (!punho || !cont.contains(punho)) return;
-    const el = punho.closest(itemSel);
-    if (!el) return;
-    e.preventDefault();
 
-    let mexeu = false, ultimoY = e.clientY;
-    try { punho.setPointerCapture(e.pointerId); } catch (_) {}  // ponteiro já solto
-    el.classList.add('arrastando');
-    document.body.classList.add('arrastando-on');
+  cont.addEventListener('pointerdown', e => {
+    if (e.button) return;                                  // só o botão principal
+    const el = e.target.closest(itemSel);
+    if (!el || !cont.contains(el)) return;
+    if (e.target.closest('button')) return;                // ✎ ✓ × seguem clicáveis
+
+    const noPunho = !!e.target.closest('.grip');
+    const x0 = e.clientX, y0 = e.clientY;
+    let espera = null, ativo = false, mexeu = false;
+    let fantasma = null, dx = 0, dy = 0, esqFixa = 0, ultimoY = y0, rolagem = null;
 
     const itens = () => [...cont.querySelectorAll(itemSel)];
+    // Em lista, andar na horizontal nao quer dizer nada: o fantasma so sobe e desce.
+    // Na grade de cards ele segue os dois eixos.
+    const posicionar = (x, y) => {
+      const px = eixo === 'x' ? x + dx : esqFixa;
+      fantasma.style.transform =
+        'translate(' + px + 'px,' + (y + dy) + 'px) scale(1.02) rotate(-.35deg)';
+    };
 
-    // rola a página sozinho quando o dedo/cursor chega perto da borda
-    const rolar = setInterval(() => {
-      const m = 70;
-      if (ultimoY < m) scrollBy(0, -11);
-      else if (ultimoY > innerHeight - m) scrollBy(0, 11);
-    }, 16);
+    const comecar = () => {
+      espera = null;
+      ativo = true;
+      if (document.activeElement && document.activeElement.blur) {
+        document.activeElement.blur();                     // não deixa o teclado subir
+      }
+      const r = el.getBoundingClientRect();
+      dx = r.left - x0; dy = r.top - y0; esqFixa = r.left;
+      fantasma = criarFantasma(el, r);
+      posicionar(x0, y0);
+      el.classList.remove('pressionando');
+      el.classList.add('arrastando');
+      document.body.classList.add('arrastando-on');
+      rolagem = setInterval(() => {
+        const m = 70;
+        if (ultimoY < m) scrollBy(0, -11);
+        else if (ultimoY > innerHeight - m) scrollBy(0, 11);
+      }, 16);
+    };
+
+    const desistir = () => {
+      if (espera) { clearTimeout(espera); espera = null; }
+      el.classList.remove('pressionando');
+    };
 
     const mover = ev => {
       ultimoY = ev.clientY;
+      if (!ativo) {
+        // escorregou antes da hora? era rolagem, não arraste
+        if (Math.abs(ev.clientX - x0) > ARRASTE_FOLGA ||
+            Math.abs(ev.clientY - y0) > ARRASTE_FOLGA) desistir();
+        return;
+      }
+      posicionar(ev.clientX, ev.clientY);
       const alvo = itens().find(n => {
         if (n === el) return false;
         const r = n.getBoundingClientRect();
@@ -1720,11 +1797,20 @@ function sortable(cont, itemSel, eixo, onEnd) {
       mexeu = true;
     };
 
+    // no toque, segurar a rolagem exige um touchmove não-passivo
+    const segurarRolagem = ev => { if (ativo) ev.preventDefault(); };
+    const semMenu = ev => { if (ativo || espera) ev.preventDefault(); };
+
     const fim = () => {
-      clearInterval(rolar);
+      desistir();
+      clearInterval(rolagem);
       document.removeEventListener('pointermove', mover);
       document.removeEventListener('pointerup', fim);
       document.removeEventListener('pointercancel', fim);
+      document.removeEventListener('touchmove', segurarRolagem);
+      document.removeEventListener('contextmenu', semMenu, true);
+      if (!ativo) return;
+      if (fantasma) fantasma.remove();
       el.classList.remove('arrastando');
       document.body.classList.remove('arrastando-on');
       if (mexeu) onEnd(itens().map(n => +n.dataset.i));
@@ -1733,6 +1819,17 @@ function sortable(cont, itemSel, eixo, onEnd) {
     document.addEventListener('pointermove', mover);
     document.addEventListener('pointerup', fim);
     document.addEventListener('pointercancel', fim);
+    document.addEventListener('touchmove', segurarRolagem, { passive: false });
+    document.addEventListener('contextmenu', semMenu, true);
+
+    if (noPunho) {
+      e.preventDefault();
+      try { el.setPointerCapture(e.pointerId); } catch (_) {}
+      comecar();
+    } else {
+      el.classList.add('pressionando');
+      espera = setTimeout(comecar, ARRASTE_ESPERA);
+    }
   });
 }
 
