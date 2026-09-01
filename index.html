@@ -1695,8 +1695,9 @@ const GRIP = '<svg width="9" height="14" viewBox="0 0 9 14" aria-hidden="true">'
 // Ponteiro (mouse E toque) em vez de HTML5 drag-and-drop, que não funciona no celular.
 // Dois jeitos de começar: pelo punho (na hora) ou segurando a linha por meio segundo.
 // eixo 'y' para listas em tabela, 'x' para a grade de cards.
-const ARRASTE_ESPERA = 500;   // ms segurando a linha até liberar o arraste
+const ARRASTE_ESPERA = 500;   // ms segurando a linha até liberar o arraste (toque)
 const ARRASTE_FOLGA  = 8;     // px que o dedo pode escorregar sem cancelar a espera
+const ARRASTE_LIMIAR = 6;     // px de movimento que já iniciam o arraste no mouse
 
 // Cópia visual que segue o ponteiro. <tr> não sobrevive fora de uma <table>,
 // então a linha é reembalada numa tabela própria com as larguras congeladas.
@@ -1728,6 +1729,11 @@ function criarFantasma(el, r) {
 function sortable(cont, itemSel, eixo, onEnd) {
   if (!cont) return;
 
+  // Pressionar e mover sobre um <input> é "arrastar texto" para o navegador — e os
+  // campos de valor fazem selAll no foco, então o texto já está selecionado esperando.
+  // Sem isto, o que se arrasta é o conteúdo do campo, não a linha.
+  cont.addEventListener('dragstart', e => e.preventDefault());
+
   cont.addEventListener('pointerdown', e => {
     if (e.button) return;                                  // só o botão principal
     const el = e.target.closest(itemSel);
@@ -1735,6 +1741,13 @@ function sortable(cont, itemSel, eixo, onEnd) {
     if (e.target.closest('button')) return;                // ✎ ✓ × seguem clicáveis
 
     const noPunho = !!e.target.closest('.grip');
+    // Já editando este campo? Então pressionar e mover é seleção de texto, não arraste.
+    const campo = e.target.closest('input, textarea, select');
+    if (campo && document.activeElement === campo && !noPunho) return;
+
+    // Mouse não rola a página arrastando, então pode pegar assim que mexer.
+    // No toque, mover tem que rolar a lista — lá continua valendo a espera.
+    const noMouse = e.pointerType === 'mouse';
     const x0 = e.clientX, y0 = e.clientY;
     let espera = null, ativo = false, mexeu = false;
     let fantasma = null, dx = 0, dy = 0, esqFixa = 0, ultimoY = y0, rolagem = null;
@@ -1754,6 +1767,8 @@ function sortable(cont, itemSel, eixo, onEnd) {
       if (document.activeElement && document.activeElement.blur) {
         document.activeElement.blur();                     // não deixa o teclado subir
       }
+      const selecao = window.getSelection && window.getSelection();
+      if (selecao && selecao.removeAllRanges) selecao.removeAllRanges();
       const r = el.getBoundingClientRect();
       dx = r.left - x0; dy = r.top - y0; esqFixa = r.left;
       fantasma = criarFantasma(el, r);
@@ -1776,9 +1791,11 @@ function sortable(cont, itemSel, eixo, onEnd) {
     const mover = ev => {
       ultimoY = ev.clientY;
       if (!ativo) {
-        // escorregou antes da hora? era rolagem, não arraste
-        if (Math.abs(ev.clientX - x0) > ARRASTE_FOLGA ||
-            Math.abs(ev.clientY - y0) > ARRASTE_FOLGA) desistir();
+        const dist = Math.max(Math.abs(ev.clientX - x0), Math.abs(ev.clientY - y0));
+        // no mouse, mexeu = arrastou
+        if (noMouse) { if (dist > ARRASTE_LIMIAR) comecar(); return; }
+        // no toque, escorregou antes da hora? era rolagem, não arraste
+        if (dist > ARRASTE_FOLGA) desistir();
         return;
       }
       posicionar(ev.clientX, ev.clientY);
@@ -1826,10 +1843,11 @@ function sortable(cont, itemSel, eixo, onEnd) {
       e.preventDefault();
       try { el.setPointerCapture(e.pointerId); } catch (_) {}
       comecar();
-    } else {
+    } else if (!noMouse) {
       el.classList.add('pressionando');
       espera = setTimeout(comecar, ARRASTE_ESPERA);
     }
+    // no mouse não há espera nem realce: o arraste começa no primeiro movimento
   });
 }
 
